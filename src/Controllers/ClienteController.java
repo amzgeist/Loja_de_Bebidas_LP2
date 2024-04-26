@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class ClienteController {
-    private ArrayList<Cliente> clientes = new ArrayList<>();
+    final ArrayList<Cliente> clientes = new ArrayList<>();
 
     public void cadastrarCliente(String nome, Date dataNascimento, String CPF) {
         for (Cliente cliente : clientes) {
@@ -15,7 +15,7 @@ public class ClienteController {
                 return;
             }
         }
-        clientes.add(new Cliente(nome, dataNascimento, CPF));
+        clientes.add(new Cliente(nome, CPF, dataNascimento));
         System.out.println("Cliente cadastrado com sucesso.");
     }
 
