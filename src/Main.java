@@ -102,12 +102,6 @@ public class Main {
                     funcionarioController.cadastrarFuncionario(nomef, CPFf, tipo, salario);
                     break;
                 case 5:
-                    System.out.println("Digite o código do funcionário que deseja deletar:");
-                    int codFuncDelete = scanner.nextInt();
-                    scanner.nextLine();
-                    funcionarioController.deletarFuncionario(codFuncDelete);
-                    break;
-                case 6:
                     System.out.println("Digite o código do funcionário que deseja buscar:");
                     int codFuncSearch = scanner.nextInt();
                     scanner.nextLine();
@@ -157,7 +151,7 @@ public class Main {
                         }
                     }
                     break;
-                case 7:
+                case 6:
                     funcionarioController.listarFuncionarios();
                     break;
                 default:

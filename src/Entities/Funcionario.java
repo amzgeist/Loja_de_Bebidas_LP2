@@ -2,7 +2,7 @@ package Entities;
 
 public class Funcionario extends Pessoa {
     private static int proximoCodigo = 1;
-    final int codFunc;
+    private int codFunc;
     private boolean ativo;
     private String tipo;
     private double salario;

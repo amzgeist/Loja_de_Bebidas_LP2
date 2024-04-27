@@ -15,6 +15,10 @@ public class Cliente extends Pessoa {
         return nome;
     }
 
+    public void setDataNascimento(Date dataNascimento) {
+        this.dataNascimento = dataNascimento;
+    }
+
     public String getDataNascimentoFormatada() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(dataNascimento);
