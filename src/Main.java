@@ -1,9 +1,12 @@
 import Controllers.ClienteController;
 import Controllers.FuncionarioController;
+import Controllers.ProdutoController;
 import Entities.Cliente;
+import Entities.Produto;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -11,6 +14,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         ClienteController clienteController = new ClienteController();
         FuncionarioController funcionarioController = new FuncionarioController();
+        ProdutoController produtoController = new ProdutoController();
 
         while (true) {
             System.out.println("Escolha uma opção:");
@@ -21,6 +25,11 @@ public class Main {
             System.out.println("4. Cadastrar Funcionario");
             System.out.println("5. Buscar Funcionario");
             System.out.println("6. Listar Funcionario");
+            System.out.println("7. Cadastrar um Produto");
+            System.out.println("8. Listar Produtos");
+            System.out.println("9. Buscar um Produto");
+            System.out.println("10. Atualizar Estoque");
+            System.out.println("11. Apagar um Produto");
 
             int opcao = scanner.nextInt();
             scanner.nextLine();
@@ -152,6 +161,68 @@ public class Main {
                     break;
                 case 6:
                     funcionarioController.listarFuncionarios();
+                    break;
+                case 7:
+                    String nomeP = "";
+                    float preco = 0;
+                    int estoque = 0;
+                    boolean dadosValidos = false;
+                    while (!dadosValidos) {
+                        try {
+                            scanner.nextLine();
+                            System.out.print("Digite o nome do produto: ");
+                            nomeP = scanner.nextLine();
+
+                            System.out.print("Digite o preço do produto: ");
+                            preco = scanner.nextFloat();
+                            if (preco <= 0) {
+                                throw new IllegalArgumentException("O preço do produto deve ser um valor positivo.");
+                            }
+
+                            System.out.print("Digite o estoque do produto: ");
+                            estoque = scanner.nextInt();
+                            if (estoque < 0) {
+                                throw new IllegalArgumentException("O estoque do produto deve ser um valor não negativo.");
+                            }
+
+                            dadosValidos = true;
+                        } catch (InputMismatchException e) {
+                            System.out.println("Valor inserido inválido. Certifique-se de inserir um valor numérico válido.");
+                            scanner.nextLine();
+                        } catch (IllegalArgumentException e) {
+                            System.out.println(e.getMessage());
+                        }
+                    }
+                    produtoController.cadastrarProduto(nomeP, preco, estoque);
+                    break;
+                case 8:
+                    produtoController.listarProdutos();
+                    break;
+                case 9:
+                    System.out.print("Digite o código do produto: ");
+                    int codigoBusca = scanner.nextInt();
+                    Produto produtoBuscado = produtoController.buscarProdutoPorCodigo(codigoBusca);
+                    if (produtoBuscado != null) {
+                        System.out.println("Produto encontrado:");
+                        System.out.println("Código: " + produtoBuscado.getCodigo());
+                        System.out.println("Nome: " + produtoBuscado.getNome());
+                        System.out.println("Preço: " + produtoBuscado.getPreco());
+                        System.out.println("Estoque: " + produtoBuscado.getEstoque());
+                    } else {
+                        System.out.println("Produto não encontrado.");
+                    }
+                    break;
+                case 10:
+                    System.out.print("Digite o código do produto: ");
+                    int codigoAtualizacao = scanner.nextInt();
+                    System.out.print("Digite o novo estoque: ");
+                    int novoEstoque = scanner.nextInt();
+                    produtoController.atualizarEstoque(codigoAtualizacao, novoEstoque);
+                    break;
+                case 11:
+                    System.out.print("Digite o código do produto: ");
+                    int codigoRemocao = scanner.nextInt();
+                    produtoController.apagarProduto(codigoRemocao);
                     break;
                 default:
                     System.out.println("Opção inválida.");
