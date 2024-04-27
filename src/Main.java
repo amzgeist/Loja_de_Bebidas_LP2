@@ -19,9 +19,8 @@ public class Main {
             System.out.println("2. Listar Clientes");
             System.out.println("3. Buscar Cliente");
             System.out.println("4. Cadastrar Funcionario");
-            System.out.println("5. Desativar Funcionario");
-            System.out.println("6. Buscar Funcionario");
-            System.out.println("7. Listar Funcionario");
+            System.out.println("5. Buscar Funcionario");
+            System.out.println("6. Listar Funcionario");
 
             int opcao = scanner.nextInt();
             scanner.nextLine();
