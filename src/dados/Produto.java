@@ -1,4 +1,4 @@
-package Entities;
+package dados;
 
 public class Produto {
     private static int proximoCodigo = 1;
