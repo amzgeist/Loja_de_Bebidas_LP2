@@ -1,12 +1,26 @@
-package Controllers;
+package negocio;
 
-import Entities.Cliente;
+import dados.Cliente;
+import excecoes.ClienteNaoEncontradoException;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class ClienteController {
-    final ArrayList<Cliente> clientes = new ArrayList<>();
+    private static ClienteController instance;
+    private final ArrayList<Cliente> clientes;
+
+    private ClienteController() {
+        clientes = new ArrayList<>();
+    }
+
+    public static ClienteController getInstance() {
+        if (instance == null) {
+            instance = new ClienteController();
+        }
+        return instance;
+    }
 
     public void cadastrarCliente(String nome, Date dataNascimento, String CPF) {
         for (Cliente cliente : clientes) {
@@ -22,13 +36,13 @@ public class ClienteController {
     public void atualizarCliente(String CPF, String nome, Date dataNascimento) {
         for (Cliente cliente : clientes) {
             if (cliente.getCPF().equals(CPF)) {
-                cliente.nome = nome;
-                cliente.dataNascimento = dataNascimento;
+                cliente.setNome(nome);
+                cliente.setDataNascimento(dataNascimento);
                 System.out.println("Cliente atualizado com sucesso.");
                 return;
             }
         }
-        System.out.println("Cliente não encontrado.");
+        throw new ClienteNaoEncontradoException("Cliente não encontrado.");
     }
 
     public void deletarCliente(String CPF) {
@@ -39,7 +53,7 @@ public class ClienteController {
                 return;
             }
         }
-        System.out.println("Cliente não encontrado.");
+        throw new ClienteNaoEncontradoException("Cliente não encontrado.");
     }
 
     public void listarClientes() {
@@ -61,7 +75,6 @@ public class ClienteController {
                 return cliente;
             }
         }
-        System.out.println("CPF não encontrado.");
-        return null;
+        throw new ClienteNaoEncontradoException("CPF não encontrado.");
     }
 }

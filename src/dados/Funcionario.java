@@ -1,8 +1,8 @@
-package Entities;
+package dados;
 
 public class Funcionario extends Pessoa {
     private static int proximoCodigo = 1;
-    private int codFunc;
+    private final int codFunc;
     private boolean ativo;
     private String tipo;
     private double salario;
@@ -27,15 +27,41 @@ public class Funcionario extends Pessoa {
         this.ativo = ativo;
     }
 
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
     public String getTipo() {
         return tipo;
+    }
+
+    public void setSalario(double salario) {
+        this.salario = salario;
     }
 
     public double getSalario() {
         return salario;
     }
 
-    public void setSalario(double salario) {
-        this.salario = salario;
+    public void setCPF(String CPF) {
+        this.CPF = CPF;
+    }
+
+    public String getCPF() {
+        return CPF;
+    }
+
+    public void setNomeFuncionario(String nome) {
+    }
+
+    public void setCPFFuncionario(String cpf) {
     }
 }

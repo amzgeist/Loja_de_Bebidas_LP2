@@ -1,8 +1,8 @@
-package Entities;
+package dados;
 
-public class Pessoa {
-    public String nome;
-    public String CPF;
+public abstract class Pessoa {
+    protected String nome;
+    protected String CPF;
 
     public Pessoa(String nome, String CPF) {
         this.nome = nome;

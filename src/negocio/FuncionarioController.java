@@ -1,23 +1,46 @@
-package Controllers;
+package negocio;
 
-import Entities.Funcionario;
+import dados.Funcionario;
+import excecoes.FuncionarioInativoException;
 
 import java.util.ArrayList;
 
 public class FuncionarioController {
-    final ArrayList<Funcionario> funcionarios = new ArrayList<>();
+    private final ArrayList<Funcionario> funcionarios = new ArrayList<>();
+    private static FuncionarioController instance;
+
+    private FuncionarioController() {
+    }
+
+    public static FuncionarioController getInstance() {
+        if (instance == null) {
+            instance = new FuncionarioController();
+        }
+        return instance;
+    }
 
     public void cadastrarFuncionario(String nome, String CPF, String tipo, double salario) {
-
         for (Funcionario funcionario : funcionarios) {
             if (funcionario.getCPF().equals(CPF)) {
                 System.out.println("CPF já cadastrado.");
                 return;
             }
         }
-
         funcionarios.add(new Funcionario(nome, CPF, tipo, salario));
         System.out.println("Funcionário cadastrado com sucesso.");
+    }
+
+    public Funcionario buscarFuncionario(int codFunc) throws FuncionarioInativoException {
+        for (Funcionario funcionario : funcionarios) {
+            if (funcionario.getCodFunc() == codFunc) {
+                if (!funcionario.isAtivo()) {
+                    throw new FuncionarioInativoException("Funcionário " + funcionario.getNome() + " está inativo.");
+                }
+                return funcionario;
+            }
+        }
+        System.out.println("Funcionário não encontrado.");
+        return null;
     }
 
     public void deletarFuncionario(int codFunc) {
@@ -31,22 +54,6 @@ public class FuncionarioController {
         System.out.println("Funcionário não encontrado.");
     }
 
-    public void buscarFuncionario(int codFunc) {
-        for (Funcionario funcionario : funcionarios) {
-            if (funcionario.getCodFunc() == codFunc) {
-                if (!funcionario.isAtivo()) {
-                    throw new IllegalArgumentException("Funcionário inativo");
-                }
-                System.out.println("Nome: " + funcionario.getNome());
-                System.out.println("CPF: " + funcionario.getCPF());
-                System.out.println("Tipo: " + funcionario.getTipo());
-                System.out.println("Salário: R$ " + funcionario.getSalario());
-                return;
-            }
-        }
-        throw new IllegalArgumentException("Funcionário não existe.");
-    }
-
     public void alterarFuncionario(int codFunc, String nome, String CPF, double salario) {
         for (Funcionario funcionario : funcionarios) {
             if (funcionario.getCodFunc() == codFunc) {
@@ -56,8 +63,8 @@ public class FuncionarioController {
                         return;
                     }
                 }
-                funcionario.nome = nome;
-                funcionario.CPF = CPF;
+                funcionario.setNomeFuncionario(nome);
+                funcionario.setCPFFuncionario(CPF);
                 funcionario.setSalario(salario);
                 System.out.println("Funcionário atualizado com sucesso.");
                 return;

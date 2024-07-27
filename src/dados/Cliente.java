@@ -1,14 +1,18 @@
-package Entities;
+package dados;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Cliente extends Pessoa {
-    public Date dataNascimento;
+    private Date dataNascimento;
 
     public Cliente(String nome, String CPF, Date dataNascimento) {
         super(nome, CPF);
         this.dataNascimento = dataNascimento;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
     }
 
     public String getNome() {
@@ -22,6 +26,10 @@ public class Cliente extends Pessoa {
     public String getDataNascimentoFormatada() {
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         return sdf.format(dataNascimento);
+    }
+
+    public void setCPF(String CPF) {
+        this.CPF = CPF;
     }
 
     public String getCPF() {
