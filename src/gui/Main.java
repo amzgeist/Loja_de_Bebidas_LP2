@@ -4,6 +4,7 @@ import negocio.ClienteController;
 import negocio.FuncionarioController;
 import dados.Cliente;
 import dados.Funcionario;
+import excecoes.ClienteNaoEncontradoException;
 import excecoes.FuncionarioInativoException;
 
 import java.text.SimpleDateFormat;
@@ -50,46 +51,51 @@ public class Main {
                 case 3 -> {
                     System.out.print("CPF: ");
                     String CPF = scanner.nextLine();
-                    Cliente cliente = clienteController.buscarCliente(CPF);
-                    if (cliente != null) {
-                        System.out.println("Nome: " + cliente.getNome());
-                        System.out.println("CPF: " + cliente.getCPF());
-                        System.out.println("Data de Nascimento: " + cliente.getDataNascimentoFormatada());
+                    try {
+                        Cliente cliente = clienteController.buscarCliente(CPF);
+                        if (cliente != null) {
+                            System.out.println("Nome: " + cliente.getNome());
+                            System.out.println("CPF: " + cliente.getCPF());
+                            System.out.println("Data de Nascimento: " + cliente.getDataNascimentoFormatada());
 
-                        // Menu para operações adicionais com cliente
-                        boolean backToMainMenu = false;
-                        while (!backToMainMenu) {
-                            System.out.println("\n--- Cliente Menu ---");
-                            System.out.println("1. Atualizar Cliente");
-                            System.out.println("2. Deletar Cliente");
-                            System.out.println("3. Voltar ao Menu Principal");
-                            System.out.print("Escolha uma opção: ");
-                            int clienteOption = scanner.nextInt();
-                            scanner.nextLine(); // consume newline
+                            // Menu para operações adicionais com cliente
+                            boolean backToMainMenu = false;
+                            while (!backToMainMenu) {
+                                System.out.println("\n--- Cliente Menu ---");
+                                System.out.println("1. Atualizar Cliente");
+                                System.out.println("2. Deletar Cliente");
+                                System.out.println("3. Voltar ao Menu Principal");
+                                System.out.print("Escolha uma opção: ");
+                                int clienteOption = scanner.nextInt();
+                                scanner.nextLine(); // consume newline
 
-                            switch (clienteOption) {
-                                case 1 -> {
-                                    System.out.print("Novo Nome: ");
-                                    String novoNome = scanner.nextLine();
-                                    System.out.print("Nova Data de Nascimento (dd/MM/yyyy): ");
-                                    String novaDataStr = scanner.nextLine();
+                                switch (clienteOption) {
+                                    case 1 -> {
+                                        System.out.print("Novo Nome: ");
+                                        String novoNome = scanner.nextLine();
+                                        System.out.print("Nova Data de Nascimento (dd/MM/yyyy): ");
+                                        String novaDataStr = scanner.nextLine();
 
-                                    try {
-                                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                                        Date novaDataNascimento = sdf.parse(novaDataStr);
-                                        clienteController.atualizarCliente(CPF, novoNome, novaDataNascimento);
-                                    } catch (Exception e) {
-                                        System.out.println("Data inválida.");
+                                        try {
+                                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                                            Date novaDataNascimento = sdf.parse(novaDataStr);
+                                            clienteController.atualizarCliente(CPF, novoNome, novaDataNascimento);
+                                        } catch (Exception e) {
+                                            System.out.println("Data inválida.");
+                                        }
                                     }
+                                    case 2 -> {
+                                        clienteController.deletarCliente(CPF);
+                                        backToMainMenu = true;
+                                    }
+                                    case 3 -> backToMainMenu = true;
+                                    default -> System.out.println("Opção inválida.");
                                 }
-                                case 2 -> {
-                                    clienteController.deletarCliente(CPF);
-                                    backToMainMenu = true;
-                                }
-                                case 3 -> backToMainMenu = true;
-                                default -> System.out.println("Opção inválida.");
                             }
                         }
+                    } catch (ClienteNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
+                        System.out.println("Voltando ao menu principal...");
                     }
                 }
                 case 4 -> {
