@@ -8,10 +8,10 @@ import dados.Funcionario;
 import dados.Produto;
 import excecoes.ClienteNaoEncontradoException;
 import excecoes.FuncionarioInativoException;
+import excecoes.ProdutoJaExisteException;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -28,11 +28,9 @@ public class Main {
             System.out.println("4. Cadastrar Funcionário");
             System.out.println("5. Listar Funcionários");
             System.out.println("6. Buscar Funcionário");
-            System.out.println("7. Cadastrar um Produto");
+            System.out.println("7. Cadastrar Produto");
             System.out.println("8. Listar Produtos");
-            System.out.println("9. Buscar um Produto");
-            System.out.println("10. Atualizar Estoque");
-            System.out.println("11. Apagar um Produto");
+            System.out.println("9. Buscar Produto");
             System.out.println("0. Sair");
             System.out.print("Escolha uma opção: ");
 
@@ -128,10 +126,21 @@ public class Main {
                         Funcionario funcionario = funcionarioController.buscarFuncionario(codFunc);
                         if (funcionario != null) {
                             System.out.println("Nome: " + funcionario.getNome());
-                            System.out.println("Código: " + funcionario.getCodFunc());
                             System.out.println("CPF: " + funcionario.getCPF());
                             System.out.println("Tipo: " + funcionario.getTipo());
-                            System.out.println("Salário: " + funcionario.getSalario());
+                            System.out.println("Salário: R$ " + funcionario.getSalario());
+
+                            if (!funcionario.isAtivo()) {
+                                System.out.println("Funcionário " + funcionario.getNome() + " está inativo. Deseja reativá-lo?");
+                                System.out.println("1. Sim");
+                                System.out.println("2. Não, voltar ao menu principal");
+                                int reativaOption = scanner.nextInt();
+                                scanner.nextLine(); // consume newline
+
+                                if (reativaOption == 1) {
+                                    funcionarioController.reativaFuncionario(codFunc);
+                                }
+                            }
 
                             // Menu para operações adicionais com funcionário
                             boolean backToMainMenu = false;
@@ -148,12 +157,12 @@ public class Main {
                                     case 1 -> {
                                         System.out.print("Novo Nome: ");
                                         String novoNome = scanner.nextLine();
-                                        System.out.print("Novo CPF: ");
-                                        String novoCPF = scanner.nextLine();
+                                        System.out.print("Novo Tipo: ");
+                                        String novoTipo = scanner.nextLine();
                                         System.out.print("Novo Salário: ");
                                         double novoSalario = scanner.nextDouble();
                                         scanner.nextLine(); // consume newline
-                                        funcionarioController.alterarFuncionario(codFunc, novoNome, novoCPF, novoSalario);
+                                        funcionarioController.atualizarFuncionario(codFunc, novoNome, novoTipo, novoSalario);
                                     }
                                     case 2 -> {
                                         funcionarioController.deletarFuncionario(codFunc);
@@ -165,7 +174,6 @@ public class Main {
                             }
                         }
                     } catch (FuncionarioInativoException e) {
-                        // Obtendo o nome do funcionário inativo
                         String errorMessage = e.getMessage();
                         String funcionarioNome = errorMessage.substring(errorMessage.indexOf("Funcionário ") + 12, errorMessage.indexOf(" está inativo"));
 
@@ -181,64 +189,73 @@ public class Main {
                     }
                 }
                 case 7 -> {
-                    String nomeP = "";
-                    float preco = 0;
-                    int estoque = 0;
-                    boolean dadosValidos = false;
-                    while (!dadosValidos) {
-                        try {
-                            scanner.nextLine();
-                            System.out.print("Digite o nome do produto: ");
-                            nomeP = scanner.nextLine();
+                    System.out.print("Nome do Produto: ");
+                    String nomeProduto = scanner.nextLine();
+                    System.out.print("Preço do Produto: ");
+                    float precoProduto = scanner.nextFloat();
+                    System.out.print("Quantidade em Estoque: ");
+                    int estoqueProduto = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
 
-                            System.out.print("Digite o preço do produto: ");
-                            preco = scanner.nextFloat();
-                            if (preco <= 0) {
-                                throw new IllegalArgumentException("O preço do produto deve ser um valor positivo.");
-                            }
-
-                            System.out.print("Digite o estoque do produto: ");
-                            estoque = scanner.nextInt();
-                            if (estoque < 0) {
-                                throw new IllegalArgumentException("O estoque do produto deve ser um valor não negativo.");
-                            }
-
-                            dadosValidos = true;
-                        } catch (InputMismatchException e) {
-                            System.out.println("Valor inserido inválido. Certifique-se de inserir um valor numérico válido.");
-                            scanner.nextLine();
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                        }
+                    try {
+                        produtoController.cadastrarProduto(nomeProduto, precoProduto, estoqueProduto);
+                    } catch (ProdutoJaExisteException e) {
+                        System.out.println(e.getMessage());
+                        System.out.println("Voltando ao menu principal...");
+                    } catch (IllegalArgumentException e) {
+                        System.out.println(e.getMessage());
                     }
-                    produtoController.cadastrarProduto(nomeP, preco, estoque);
                 }
                 case 8 -> produtoController.listarProdutos();
                 case 9 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoBusca = scanner.nextInt();
-                    Produto produtoBuscado = produtoController.buscarProdutoPorCodigo(codigoBusca);
-                    if (produtoBuscado != null) {
-                        System.out.println("Produto encontrado:");
-                        System.out.println("Código: " + produtoBuscado.getCodigo());
-                        System.out.println("Nome: " + produtoBuscado.getNome());
-                        System.out.println("Preço: " + produtoBuscado.getPreco());
-                        System.out.println("Estoque: " + produtoBuscado.getEstoque());
+                    System.out.print("Código do Produto: ");
+                    int codigoProduto = scanner.nextInt();
+                    scanner.nextLine(); // consume newline
+
+                    Produto produto = produtoController.buscarProdutoPorCodigo(codigoProduto);
+                    if (produto != null) {
+                        System.out.println("Nome: " + produto.getNome());
+                        System.out.println("Preço: R$ " + produto.getPreco());
+                        System.out.println("Estoque: " + produto.getEstoque());
+
+                        // Menu para operações adicionais com produto
+                        boolean backToMainMenu = false;
+                        while (!backToMainMenu) {
+                            System.out.println("\n--- Produto Menu ---");
+                            System.out.println("1. Atualizar Produto");
+                            System.out.println("2. Deletar Produto");
+                            System.out.println("3. Voltar ao Menu Principal");
+                            System.out.print("Escolha uma opção: ");
+                            int prodOption = scanner.nextInt();
+                            scanner.nextLine(); // consume newline
+
+                            switch (prodOption) {
+                                case 1 -> {
+                                    System.out.print("Novo Nome: ");
+                                    String novoNomeProduto = scanner.nextLine();
+                                    System.out.print("Novo Preço: ");
+                                    float novoPrecoProduto = scanner.nextFloat();
+                                    System.out.print("Novo Estoque: ");
+                                    int novoEstoqueProduto = scanner.nextInt();
+                                    scanner.nextLine(); // consume newline
+
+                                    try {
+                                        produtoController.atualizarProduto(codigoProduto, novoNomeProduto, novoPrecoProduto, novoEstoqueProduto);
+                                    } catch (IllegalArgumentException e) {
+                                        System.out.println(e.getMessage());
+                                    }
+                                }
+                                case 2 -> {
+                                    produtoController.apagarProduto(codigoProduto);
+                                    backToMainMenu = true;
+                                }
+                                case 3 -> backToMainMenu = true;
+                                default -> System.out.println("Opção inválida.");
+                            }
+                        }
                     } else {
                         System.out.println("Produto não encontrado.");
                     }
-                }
-                case 10 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoAtualizacao = scanner.nextInt();
-                    System.out.print("Digite o novo estoque: ");
-                    int novoEstoque = scanner.nextInt();
-                    produtoController.atualizarEstoque(codigoAtualizacao, novoEstoque);
-                }
-                case 11 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoRemocao = scanner.nextInt();
-                    produtoController.apagarProduto(codigoRemocao);
                 }
                 case 0 -> {
                     System.out.println("Saindo...");

@@ -33,4 +33,12 @@ public class Produto {
     public void setEstoque(int estoque) {
         this.estoque = estoque;
     }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public void setPreco(float preco) {
+        this.preco = preco;
+    }
 }

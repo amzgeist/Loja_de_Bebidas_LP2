@@ -54,7 +54,7 @@ public class FuncionarioController {
         System.out.println("Funcionário não encontrado.");
     }
 
-    public void alterarFuncionario(int codFunc, String nome, String CPF, double salario) {
+    public void atualizarFuncionario(int codFunc, String nome, String CPF, double salario) {
         for (Funcionario funcionario : funcionarios) {
             if (funcionario.getCodFunc() == codFunc) {
                 for (Funcionario outroFuncionario : funcionarios) {

@@ -1,12 +1,17 @@
 package negocio;
 
-import java.util.ArrayList;
-
 import dados.Produto;
+import excecoes.ProdutoJaExisteException;
+import java.util.ArrayList;
 
 public class ProdutoController {
     private ArrayList<Produto> produtos;
     private static ProdutoController instance;
+
+    private ProdutoController() {
+        produtos = new ArrayList<>();
+        inicializarProdutos();
+    }
 
     public static ProdutoController getInstance() {
         if (instance == null) {
@@ -14,8 +19,8 @@ public class ProdutoController {
         }
         return instance;
     }
-    
-    public void cadastrarProduto(String nome, float preco, int estoque) {
+
+    public void cadastrarProduto(String nome, float preco, int estoque) throws ProdutoJaExisteException {
         if (preco <= 0) {
             throw new IllegalArgumentException("O preço do produto deve ser um valor positivo.");
         }
@@ -23,13 +28,30 @@ public class ProdutoController {
             throw new IllegalArgumentException("O estoque do produto deve ser um valor não negativo.");
         }
 
+        // Verifica se um produto com o mesmo nome já existe
+        if (produtoJaExiste(nome)) {
+            throw new ProdutoJaExisteException(nome);
+        }
+
         Produto produto = new Produto(nome, preco, estoque);
         produtos.add(produto);
         System.out.println("Produto cadastrado com sucesso. Código do Produto: " + produto.getCodigo());
     }
 
+    private boolean produtoJaExiste(String nome) {
+        for (Produto produto : produtos) {
+            if (produto.getNome().equalsIgnoreCase(nome)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void listarProdutos() {
         System.out.println("----- Lista de Produtos -----");
+        if (produtos.isEmpty()) {
+            System.out.println("Nenhum produto cadastrado.");
+        }
         for (Produto produto : produtos) {
             System.out.println("Código: " + produto.getCodigo());
             System.out.println("Nome: " + produto.getNome());
@@ -48,11 +70,13 @@ public class ProdutoController {
         return null;
     }
 
-    public void atualizarEstoque(int codigo, int novoEstoque) {
+    public void atualizarProduto(int codigo, String novoNome, float novoPreco, int novoEstoque) {
         Produto produto = buscarProdutoPorCodigo(codigo);
         if (produto != null) {
+            produto.setNome(novoNome);
+            produto.setPreco(novoPreco);
             produto.setEstoque(novoEstoque);
-            System.out.println("Estoque atualizado com sucesso para o Produto: " + produto.getNome());
+            System.out.println("Produto atualizado com sucesso para: " + produto.getNome());
         } else {
             System.out.println("Produto não encontrado.");
         }
@@ -73,6 +97,6 @@ public class ProdutoController {
         produtos.add(new Produto("Fanta lata", 3.00f, 20));
         produtos.add(new Produto("Brahma 600Ml", 6.00f, 30));
         produtos.add(new Produto("Monster 473Ml", 9.00f, 25));
-        produtos.add(new Produto("Água sem gás 500Ml", 1.5f, 50));
+        produtos.add(new Produto("Água sem gás 500Ml", 1.50f, 50));
     }
 }
