@@ -110,8 +110,29 @@ public class Main {
                     String nome = scanner.nextLine();
                     System.out.print("CPF: ");
                     String CPF = scanner.nextLine();
-                    System.out.print("Tipo: ");
-                    String tipo = scanner.nextLine();
+
+                    // Adicionando lógica para restrição de tipo
+                    String tipo = "";
+                    boolean tipoValido = false;
+                    while (!tipoValido) {
+                        System.out.println("Digite o Tipo de Funcionário:");
+                        System.out.println("1. Assalariado");
+                        System.out.println("2. Comissionado");
+                        System.out.print("Escolha uma opção: ");
+                        int tipoOption = scanner.nextInt();
+                        scanner.nextLine(); // consume newline
+
+                        if (tipoOption == 1) {
+                            tipo = "Assalariado";
+                            tipoValido = true;
+                        } else if (tipoOption == 2) {
+                            tipo = "Comissionado";
+                            tipoValido = true;
+                        } else {
+                            System.out.println("Opção inválida. Por favor, escolha 1 para Assalariado ou 2 para Comissionado.");
+                        }
+                    }
+
                     System.out.print("Salário: ");
                     double salario = scanner.nextDouble();
                     funcionarioController.cadastrarFuncionario(nome, CPF, tipo, salario);
@@ -157,8 +178,28 @@ public class Main {
                                     case 1 -> {
                                         System.out.print("Novo Nome: ");
                                         String novoNome = scanner.nextLine();
-                                        System.out.print("Novo Tipo: ");
-                                        String novoTipo = scanner.nextLine();
+
+                                        String novoTipo = "";
+                                        boolean novoTipoValido = false;
+                                        while (!novoTipoValido) {
+                                            System.out.println("Digite o Tipo de Funcionário:");
+                                            System.out.println("1. Assalariado");
+                                            System.out.println("2. Comissionado");
+                                            System.out.print("Escolha uma opção: ");
+                                            int tipoOption = scanner.nextInt();
+                                            scanner.nextLine(); // consume newline
+
+                                            if (tipoOption == 1) {
+                                                novoTipo = "Assalariado";
+                                                novoTipoValido = true;
+                                            } else if (tipoOption == 2) {
+                                                novoTipo = "Comissionado";
+                                                novoTipoValido = true;
+                                            } else {
+                                                System.out.println("Opção inválida. Por favor, escolha 1 para Assalariado ou 2 para Comissionado.");
+                                            }
+                                        }
+
                                         System.out.print("Novo Salário: ");
                                         double novoSalario = scanner.nextDouble();
                                         scanner.nextLine(); // consume newline
