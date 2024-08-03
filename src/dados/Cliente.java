@@ -1,38 +1,42 @@
 package dados;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
+public class Cliente {
+    private String nome;
+    private String cpf;
+    private String dataNascimento;
 
-public class Cliente extends Pessoa {
-    private Date dataNascimento;
-
-    public Cliente(String nome, String CPF, Date dataNascimento) {
-        super(nome, CPF);
-        this.dataNascimento = dataNascimento;
-    }
-
-    public void setNome(String nome) {
+    public Cliente(String nome, String cpf, String dataNascimento) {
         this.nome = nome;
+        this.cpf = cpf;
+        this.dataNascimento = dataNascimento;
     }
 
     public String getNome() {
         return nome;
     }
 
-    public void setDataNascimento(Date dataNascimento) {
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getDataNascimento() {
+        return dataNascimento;
+    }
+
+    public void setDataNascimento(String dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 
-    public String getDataNascimentoFormatada() {
-        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        return sdf.format(dataNascimento);
-    }
-
-    public void setCPF(String CPF) {
-        this.CPF = CPF;
-    }
-
-    public String getCPF() {
-        return CPF;
+    @Override
+    public String toString() {
+        return "Nome: " + nome + ", CPF: " + cpf + ", Data de Nascimento: " + dataNascimento;
     }
 }

@@ -1,252 +1,260 @@
 package gui;
 
+import java.util.Scanner;
+
+import excecoes.ClienteNaoEncontradoException;
+import excecoes.FuncionarioNaoEncontradoException;
+import excecoes.ProdutoJaExisteException;
 import negocio.ClienteController;
 import negocio.FuncionarioController;
 import negocio.ProdutoController;
+import negocio.PedidoController;
 import dados.Cliente;
 import dados.Funcionario;
 import dados.Produto;
-import excecoes.ClienteNaoEncontradoException;
-import excecoes.FuncionarioInativoException;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.InputMismatchException;
-import java.util.Scanner;
+import dados.Pedido;
 
 public class Main {
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws ProdutoJaExisteException {
         Scanner scanner = new Scanner(System.in);
         ClienteController clienteController = ClienteController.getInstance();
         FuncionarioController funcionarioController = FuncionarioController.getInstance();
         ProdutoController produtoController = ProdutoController.getInstance();
+        PedidoController pedidoController = PedidoController.getInstance();
 
         while (true) {
+            System.out.println("\n--- Sistema de Gestão ---");
+            System.out.println("1. Gerenciar Clientes");
+            System.out.println("2. Gerenciar Funcionários");
+            System.out.println("3. Gerenciar Produtos");
+            System.out.println("4. Gerenciar Pedidos");
+            System.out.println("0. Sair");
+            System.out.print("Escolha uma opção: ");
+            int choice = Integer.parseInt(scanner.nextLine());
+
+            switch (choice) {
+                case 1:
+                    gerenciarClientes(scanner, clienteController);
+                    break;
+                case 2:
+                    gerenciarFuncionarios(scanner, funcionarioController);
+                    break;
+                case 3:
+                    gerenciarProdutos(scanner, produtoController);
+                    break;
+                case 4:
+                    gerenciarPedidos(scanner, pedidoController, produtoController, clienteController, funcionarioController);
+                    break;
+                case 0:
+                    System.out.println("Saindo do sistema...");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+                    break;
+            }
+        }
+    }
+
+    private static void gerenciarClientes(Scanner scanner, ClienteController clienteController) {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Gerenciar Clientes ---");
             System.out.println("1. Cadastrar Cliente");
             System.out.println("2. Listar Clientes");
             System.out.println("3. Buscar Cliente");
-            System.out.println("4. Cadastrar Funcionário");
-            System.out.println("5. Listar Funcionários");
-            System.out.println("6. Buscar Funcionário");
-            System.out.println("7. Cadastrar um Produto");
-            System.out.println("8. Listar Produtos");
-            System.out.println("9. Buscar um Produto");
-            System.out.println("10. Atualizar Estoque");
-            System.out.println("11. Apagar um Produto");
-            System.out.println("0. Sair");
+            System.out.println("4. Atualizar Cliente");
+            System.out.println("5. Deletar Cliente");
+            System.out.println("0. Voltar");
             System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
 
-            int option = scanner.nextInt();
-            scanner.nextLine(); // consume newline
-
-            switch (option) {
-                case 1 -> {
-                    System.out.print("Nome: ");
-                    String nome = scanner.nextLine();
-                    System.out.print("Data de Nascimento (dd/MM/yyyy): ");
-                    String dataStr = scanner.nextLine();
-                    System.out.print("CPF: ");
-                    String CPF = scanner.nextLine();
-
+            switch (opcao) {
+                case 1:
+                    clienteController.cadastrarCliente(scanner);
+                    break;
+                case 2:
+                    clienteController.listarClientes();
+                    break;
+                case 3:
+                    System.out.print("Digite o CPF do cliente que deseja buscar: ");
+                    String cpf = scanner.nextLine();  // Certifique-se de usar nextLine() para ler toda a linha de entrada
                     try {
-                        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                        Date dataNascimento = sdf.parse(dataStr);
-                        clienteController.cadastrarCliente(nome, dataNascimento, CPF);
-                    } catch (Exception e) {
-                        System.out.println("Data inválida.");
-                    }
-                }
-                case 2 -> clienteController.listarClientes();
-                case 3 -> {
-                    System.out.print("CPF: ");
-                    String CPF = scanner.nextLine();
-                    try {
-                        Cliente cliente = clienteController.buscarCliente(CPF);
-                        if (cliente != null) {
-                            System.out.println("Nome: " + cliente.getNome());
-                            System.out.println("CPF: " + cliente.getCPF());
-                            System.out.println("Data de Nascimento: " + cliente.getDataNascimentoFormatada());
-
-                            // Menu para operações adicionais com cliente
-                            boolean backToMainMenu = false;
-                            while (!backToMainMenu) {
-                                System.out.println("\n--- Cliente Menu ---");
-                                System.out.println("1. Atualizar Cliente");
-                                System.out.println("2. Deletar Cliente");
-                                System.out.println("3. Voltar ao Menu Principal");
-                                System.out.print("Escolha uma opção: ");
-                                int clienteOption = scanner.nextInt();
-                                scanner.nextLine(); // consume newline
-
-                                switch (clienteOption) {
-                                    case 1 -> {
-                                        System.out.print("Novo Nome: ");
-                                        String novoNome = scanner.nextLine();
-                                        System.out.print("Nova Data de Nascimento (dd/MM/yyyy): ");
-                                        String novaDataStr = scanner.nextLine();
-
-                                        try {
-                                            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-                                            Date novaDataNascimento = sdf.parse(novaDataStr);
-                                            clienteController.atualizarCliente(CPF, novoNome, novaDataNascimento);
-                                        } catch (Exception e) {
-                                            System.out.println("Data inválida.");
-                                        }
-                                    }
-                                    case 2 -> {
-                                        clienteController.deletarCliente(CPF);
-                                        backToMainMenu = true;
-                                    }
-                                    case 3 -> backToMainMenu = true;
-                                    default -> System.out.println("Opção inválida.");
-                                }
-                            }
+                        Cliente clienteEncontrado = clienteController.buscarCliente(cpf);  // Passando a String do CPF diretamente
+                        if (clienteEncontrado != null) {
+                            System.out.println("Cliente encontrado: " + clienteEncontrado.getNome());
+                            // Outras ações após encontrar o cliente
                         }
                     } catch (ClienteNaoEncontradoException e) {
                         System.out.println(e.getMessage());
-                        System.out.println("Voltando ao menu principal...");
+                        // Opção para o usuário tentar novamente ou voltar ao menu principal
                     }
-                }
-                case 4 -> {
-                    System.out.print("Nome: ");
-                    String nome = scanner.nextLine();
-                    System.out.print("CPF: ");
-                    String CPF = scanner.nextLine();
-                    System.out.print("Tipo: ");
-                    String tipo = scanner.nextLine();
-                    System.out.print("Salário: ");
-                    double salario = scanner.nextDouble();
-                    funcionarioController.cadastrarFuncionario(nome, CPF, tipo, salario);
-                }
-                case 5 -> funcionarioController.listarFuncionarios();
-                case 6 -> {
-                    System.out.print("Código do Funcionário: ");
-                    int codFunc = scanner.nextInt();
-                    scanner.nextLine(); // consume newline
+                    break;
+                case 4:
+                    clienteController.atualizarCliente(scanner);
+                    break;
+                /*case 5:
+                    clienteController.deletarCliente(scanner);
+                    break;*/
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+                    break;
+            }
+        }
+    }
 
+    private static void gerenciarFuncionarios(Scanner scanner, FuncionarioController funcionarioController) {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Gerenciar Funcionários ---");
+            System.out.println("1. Cadastrar Funcionário");
+            System.out.println("2. Listar Funcionários");
+            System.out.println("3. Buscar Funcionário");
+            System.out.println("4. Atualizar Funcionário");
+            System.out.println("5. Deletar Funcionário");
+            System.out.println("0. Voltar");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
+
+
+            switch (opcao) {
+                case 1:
+                    funcionarioController.cadastrarFuncionario(scanner);
+                    break;
+                case 2:
+                    funcionarioController.listarFuncionarios();
+                    break;
+                case 3:  // Buscar Funcionário
+                    System.out.print("Digite o código do funcionário para busca: ");
+                    int codFunc = scanner.nextInt();
+                    scanner.nextLine();  // Limpar o buffer
                     try {
                         Funcionario funcionario = funcionarioController.buscarFuncionario(codFunc);
-                        if (funcionario != null) {
-                            System.out.println("Nome: " + funcionario.getNome());
-                            System.out.println("Código: " + funcionario.getCodFunc());
-                            System.out.println("CPF: " + funcionario.getCPF());
-                            System.out.println("Tipo: " + funcionario.getTipo());
-                            System.out.println("Salário: " + funcionario.getSalario());
-
-                            // Menu para operações adicionais com funcionário
-                            boolean backToMainMenu = false;
-                            while (!backToMainMenu) {
-                                System.out.println("\n--- Funcionário Menu ---");
-                                System.out.println("1. Atualizar Funcionário");
-                                System.out.println("2. Deletar Funcionário");
-                                System.out.println("3. Voltar ao Menu Principal");
-                                System.out.print("Escolha uma opção: ");
-                                int funcOption = scanner.nextInt();
-                                scanner.nextLine(); // consume newline
-
-                                switch (funcOption) {
-                                    case 1 -> {
-                                        System.out.print("Novo Nome: ");
-                                        String novoNome = scanner.nextLine();
-                                        System.out.print("Novo CPF: ");
-                                        String novoCPF = scanner.nextLine();
-                                        System.out.print("Novo Salário: ");
-                                        double novoSalario = scanner.nextDouble();
-                                        scanner.nextLine(); // consume newline
-                                        funcionarioController.alterarFuncionario(codFunc, novoNome, novoCPF, novoSalario);
-                                    }
-                                    case 2 -> {
-                                        funcionarioController.deletarFuncionario(codFunc);
-                                        backToMainMenu = true;
-                                    }
-                                    case 3 -> backToMainMenu = true;
-                                    default -> System.out.println("Opção inválida.");
-                                }
-                            }
-                        }
-                    } catch (FuncionarioInativoException e) {
-                        // Obtendo o nome do funcionário inativo
-                        String errorMessage = e.getMessage();
-                        String funcionarioNome = errorMessage.substring(errorMessage.indexOf("Funcionário ") + 12, errorMessage.indexOf(" está inativo"));
-
-                        System.out.println("Funcionário " + funcionarioNome + " está inativo. Deseja reativá-lo?");
-                        System.out.println("1. Sim");
-                        System.out.println("2. Não, voltar ao menu principal");
-                        int reativaOption = scanner.nextInt();
-                        scanner.nextLine(); // consume newline
-
-                        if (reativaOption == 1) {
-                            funcionarioController.reativaFuncionario(codFunc);
-                        }
+                        // Funcionário pode ser reativado internamente se estiver inativo.
+                    } catch (FuncionarioNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
                     }
-                }
-                case 7 -> {
-                    String nomeP = "";
-                    float preco = 0;
-                    int estoque = 0;
-                    boolean dadosValidos = false;
-                    while (!dadosValidos) {
-                        try {
-                            scanner.nextLine();
-                            System.out.print("Digite o nome do produto: ");
-                            nomeP = scanner.nextLine();
+                    break;
+                case 4:
+                    funcionarioController.atualizarFuncionario(scanner);
+                    break;
+                case 5:
+                    desativarFuncionario(funcionarioController, scanner);
+                    break;
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+                    break;
+            }
+        }
+    }
 
-                            System.out.print("Digite o preço do produto: ");
-                            preco = scanner.nextFloat();
-                            if (preco <= 0) {
-                                throw new IllegalArgumentException("O preço do produto deve ser um valor positivo.");
-                            }
+    private static void desativarFuncionario(FuncionarioController funcionarioController, Scanner scanner) {
+        System.out.print("Digite o código do funcionário para desativar: ");
+        if (!scanner.hasNextLine()) {
+            System.out.println("Nenhuma entrada detectada. Voltando ao menu principal...");
+            return;
+        }
+        try {
+            int codFunc = Integer.parseInt(scanner.nextLine());
+            funcionarioController.deletarFuncionario(codFunc);
+        } catch (NumberFormatException e) {
+            System.out.println("Código inválido. Por favor, digite um número inteiro.");
+        }
+    }
 
-                            System.out.print("Digite o estoque do produto: ");
-                            estoque = scanner.nextInt();
-                            if (estoque < 0) {
-                                throw new IllegalArgumentException("O estoque do produto deve ser um valor não negativo.");
-                            }
+    private static void gerenciarProdutos(Scanner scanner, ProdutoController produtoController) throws ProdutoJaExisteException {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Gerenciar Produtos ---");
+            System.out.println("1. Cadastrar Produto");
+            System.out.println("2. Listar Produtos");
+            System.out.println("3. Buscar Produto");
+            System.out.println("4. Atualizar Estoque");
+            System.out.println("0. Voltar");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
 
-                            dadosValidos = true;
-                        } catch (InputMismatchException e) {
-                            System.out.println("Valor inserido inválido. Certifique-se de inserir um valor numérico válido.");
-                            scanner.nextLine();
-                        } catch (IllegalArgumentException e) {
-                            System.out.println(e.getMessage());
-                        }
-                    }
-                    produtoController.cadastrarProduto(nomeP, preco, estoque);
-                }
-                case 8 -> produtoController.listarProdutos();
-                case 9 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoBusca = scanner.nextInt();
-                    Produto produtoBuscado = produtoController.buscarProdutoPorCodigo(codigoBusca);
+            switch (opcao) {
+                case 1:
+                    produtoController.cadastrarProduto(scanner);
+                    break;
+                case 2:
+                    produtoController.listarProdutos();
+                    break;
+                case 3:  // Buscar Produto
+                    System.out.print("Digite o código do produto para buscar: ");
+                    int codigoProduto = Integer.parseInt(scanner.nextLine());
+                    Produto produtoBuscado = produtoController.buscarProduto(codigoProduto);
                     if (produtoBuscado != null) {
-                        System.out.println("Produto encontrado:");
-                        System.out.println("Código: " + produtoBuscado.getCodigo());
+                        System.out.println("Produto encontrado!");
                         System.out.println("Nome: " + produtoBuscado.getNome());
-                        System.out.println("Preço: " + produtoBuscado.getPreco());
+                        System.out.println("Preço: R$ " + produtoBuscado.getPreco());
                         System.out.println("Estoque: " + produtoBuscado.getEstoque());
                     } else {
                         System.out.println("Produto não encontrado.");
                     }
-                }
-                case 10 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoAtualizacao = scanner.nextInt();
+                    break;
+                case 4:  // Atualizar Estoque
+                    System.out.print("Digite o código do produto para atualizar o estoque: ");
+                    int codigo = Integer.parseInt(scanner.nextLine());
                     System.out.print("Digite o novo estoque: ");
-                    int novoEstoque = scanner.nextInt();
-                    produtoController.atualizarEstoque(codigoAtualizacao, novoEstoque);
-                }
-                case 11 -> {
-                    System.out.print("Digite o código do produto: ");
-                    int codigoRemocao = scanner.nextInt();
-                    produtoController.apagarProduto(codigoRemocao);
-                }
-                case 0 -> {
-                    System.out.println("Saindo...");
-                    return;
-                }
-                default -> System.out.println("Opção inválida.");
+                    int novoEstoque = Integer.parseInt(scanner.nextLine());
+                    produtoController.atualizarEstoque(codigo, novoEstoque);
+                    break;
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+                    break;
             }
-            System.out.println();
+        }
+    }
+
+    private static void gerenciarPedidos(Scanner scanner, PedidoController pedidoController, ProdutoController produtoController, ClienteController clienteController, FuncionarioController funcionarioController) {
+        boolean running = true;
+        while (running) {
+            System.out.println("\n--- Gerenciar Pedidos ---");
+            System.out.println("1. Criar Pedido");
+            System.out.println("2. Listar Pedidos");
+            System.out.println("3. Buscar Pedido");
+            System.out.println("0. Voltar");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
+
+            switch (opcao) {
+                case 1:
+                    pedidoController.criarPedido(scanner, produtoController, clienteController, funcionarioController);
+                    break;
+                case 2:
+                    pedidoController.listarPedidos();
+                    break;
+                case 3:  // Buscar Pedido
+                    System.out.print("Digite o código do pedido que deseja buscar: ");
+                    int codigoPedido = Integer.parseInt(scanner.nextLine());
+                    Pedido pedidoEncontrado = pedidoController.buscarPedido(codigoPedido);
+                    if (pedidoEncontrado != null) {
+                        System.out.println("Pedido encontrado!");
+                        System.out.println("Código do Pedido: " + pedidoEncontrado.getCodigo());
+                        // Aqui você pode adicionar mais detalhes sobre o pedido conforme necessário
+                    } else {
+                        System.out.println("Pedido não encontrado.");
+                    }
+                    break;
+                case 0:
+                    running = false;
+                    break;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+                    break;
+            }
         }
     }
 }

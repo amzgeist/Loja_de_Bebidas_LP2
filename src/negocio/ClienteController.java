@@ -3,13 +3,13 @@ package negocio;
 import dados.Cliente;
 import excecoes.ClienteNaoEncontradoException;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
+import java.util.List;
+import java.util.Scanner;
 
 public class ClienteController {
+    private List<Cliente> clientes;
     private static ClienteController instance;
-    private final ArrayList<Cliente> clientes;
 
     private ClienteController() {
         clientes = new ArrayList<>();
@@ -22,59 +22,79 @@ public class ClienteController {
         return instance;
     }
 
-    public void cadastrarCliente(String nome, Date dataNascimento, String CPF) {
+    public void cadastrarCliente(Scanner scanner) {
+        System.out.print("Digite o nome do cliente: ");
+        String nome = scanner.nextLine();
+
+        System.out.print("Digite o CPF do cliente: ");
+        String cpf = scanner.nextLine();
+
+        // Verificar se o cliente já existe
         for (Cliente cliente : clientes) {
-            if (cliente.getCPF().equals(CPF)) {
-                System.out.println("CPF já cadastrado.");
+            if (cliente.getCpf().equals(cpf)) {
+                System.out.println("Cliente com CPF " + cpf + " já está cadastrado.");
                 return;
             }
         }
-        clientes.add(new Cliente(nome, CPF, dataNascimento));
+
+        System.out.print("Digite a data de nascimento do cliente (DD/MM/AAAA): ");
+        String dataNascimento = scanner.nextLine();
+
+        Cliente cliente = new Cliente(nome, cpf, dataNascimento);
+        clientes.add(cliente);
         System.out.println("Cliente cadastrado com sucesso.");
     }
 
-    public void atualizarCliente(String CPF, String nome, Date dataNascimento) {
-        for (Cliente cliente : clientes) {
-            if (cliente.getCPF().equals(CPF)) {
-                cliente.setNome(nome);
-                cliente.setDataNascimento(dataNascimento);
-                System.out.println("Cliente atualizado com sucesso.");
-                return;
-            }
-        }
-        throw new ClienteNaoEncontradoException("Cliente não encontrado.");
-    }
-
-    public void deletarCliente(String CPF) {
-        for (Cliente cliente : clientes) {
-            if (cliente.getCPF().equals(CPF)) {
-                clientes.remove(cliente);
-                System.out.println("Cliente removido com sucesso.");
-                return;
-            }
-        }
-        throw new ClienteNaoEncontradoException("Cliente não encontrado.");
-    }
-
     public void listarClientes() {
-        if (clientes.isEmpty()) {
-            System.out.println("NENHUM CLIENTE CADASTRADO");
-            return;
-        }
+        System.out.println("----- Lista de Clientes -----");
         for (Cliente cliente : clientes) {
-            System.out.println("Nome: " + cliente.getNome());
-            System.out.println("CPF: " + cliente.getCPF());
-            System.out.println("Data de Nascimento: " + cliente.getDataNascimentoFormatada());
-            System.out.println();
+            System.out.println(cliente);
         }
     }
 
-    public Cliente buscarCliente(String CPF) {
+    public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException {
         for (Cliente cliente : clientes) {
-            if (cliente.getCPF().equals(CPF)) {
+            if (cliente.getCpf().equals(cpf)) {
                 return cliente;
             }
         }
-        throw new ClienteNaoEncontradoException("CPF não encontrado.");
+        throw new ClienteNaoEncontradoException("Cliente com CPF " + cpf + " não encontrado.");
+    }
+
+    // Método para editar cliente
+    public void atualizarCliente(Scanner scanner) {
+        System.out.print("Digite o CPF do cliente que deseja editar: ");
+        String cpf = scanner.nextLine();
+
+        try {
+            Cliente cliente = buscarCliente(cpf);
+            System.out.println("Cliente encontrado!");
+            System.out.println("1. Alterar Nome");
+            System.out.println("2. Alterar Data de Nascimento");
+            System.out.println("0. Voltar");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
+
+            switch (opcao) {
+                case 1:
+                    System.out.print("Digite o novo nome: ");
+                    cliente.setNome(scanner.nextLine());
+                    System.out.println("Nome atualizado com sucesso.");
+                    break;
+                case 2:
+                    System.out.print("Digite a nova data de nascimento (DD/MM/AAAA): ");
+                    cliente.setDataNascimento(scanner.nextLine());
+                    System.out.println("Data de nascimento atualizada com sucesso.");
+                    break;
+                case 0:
+                    System.out.println("Voltando...");
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
+                    break;
+            }
+        } catch (ClienteNaoEncontradoException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }

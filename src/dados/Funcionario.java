@@ -1,22 +1,57 @@
 package dados;
 
-public class Funcionario extends Pessoa {
+public class Funcionario {
     private static int proximoCodigo = 1;
-    private final int codFunc;
-    private boolean ativo;
+    private int codigoFunc;
+    private String nome;
+    private String cpf;
     private String tipo;
     private double salario;
+    private boolean ativo;
 
-    public Funcionario(String nome, String CPF, String tipo, double salario) {
-        super(nome, CPF);
-        this.codFunc = proximoCodigo++;
-        this.ativo = true;
+    public Funcionario(String nome, String cpf, String tipo, double salario) {
+        this.codigoFunc = proximoCodigo++;
+        this.nome = nome;
+        this.cpf = cpf;
         this.tipo = tipo;
         this.salario = salario;
+        this.ativo = true; // Todos os funcionários são inicialmente ativos.
     }
 
-    public int getCodFunc() {
-        return codFunc;
+    public int getCodigoFunc() {
+        return codigoFunc;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public double getSalario() {
+        return salario;
+    }
+
+    public void setSalario(double salario) {
+        this.salario = salario;
     }
 
     public boolean isAtivo() {
@@ -27,41 +62,9 @@ public class Funcionario extends Pessoa {
         this.ativo = ativo;
     }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
-
-    public String getNome() {
-        return nome;
-    }
-
-    public void setTipo(String tipo) {
-        this.tipo = tipo;
-    }
-
-    public String getTipo() {
-        return tipo;
-    }
-
-    public void setSalario(double salario) {
-        this.salario = salario;
-    }
-
-    public double getSalario() {
-        return salario;
-    }
-
-    public void setCPF(String CPF) {
-        this.CPF = CPF;
-    }
-
-    public String getCPF() {
-        return CPF;
-    }
-
-    public void setNomeFuncionario(String nome) {
-    }
-
-    public void setCPFFuncionario(String cpf) {
+    @Override
+    public String toString() {
+        return "Funcionário{Código: " + codigoFunc + ", Nome: " + nome + ", CPF: " + cpf +
+                ", Tipo: " + tipo + ", Salário: R$" + salario + ", Ativo: " + ativo + "}";
     }
 }
