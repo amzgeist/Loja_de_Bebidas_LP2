@@ -3,12 +3,15 @@ package negocio;
 import dados.Cliente;
 import excecoes.ClienteNaoEncontradoException;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
 public class ClienteController {
-    private List<Cliente> clientes;
+    private final List<Cliente> clientes;
     private static ClienteController instance;
 
     private ClienteController() {
@@ -29,20 +32,19 @@ public class ClienteController {
         System.out.print("Digite o CPF do cliente: ");
         String cpf = scanner.nextLine();
 
-        // Verificar se o cliente já existe
-        for (Cliente cliente : clientes) {
-            if (cliente.getCpf().equals(cpf)) {
-                System.out.println("Cliente com CPF " + cpf + " já está cadastrado.");
-                return;
-            }
+        System.out.print("Digite a data de nascimento (DD/MM/AAAA): ");
+        String dataStr = scanner.nextLine();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        sdf.setLenient(false);
+
+        try {
+            Date dataNascimento = sdf.parse(dataStr);
+            Cliente cliente = new Cliente(nome, cpf, dataNascimento);
+            clientes.add(cliente);
+            System.out.println("Cliente cadastrado com sucesso.");
+        } catch (ParseException e) {
+            System.out.println("Erro de formato de data. Por favor, digite a data no formato DD/MM/AAAA.");
         }
-
-        System.out.print("Digite a data de nascimento do cliente (DD/MM/AAAA): ");
-        String dataNascimento = scanner.nextLine();
-
-        Cliente cliente = new Cliente(nome, cpf, dataNascimento);
-        clientes.add(cliente);
-        System.out.println("Cliente cadastrado com sucesso.");
     }
 
     public void listarClientes() {
@@ -52,13 +54,26 @@ public class ClienteController {
         }
     }
 
-    public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException {
-        for (Cliente cliente : clientes) {
-            if (cliente.getCpf().equals(cpf)) {
+    public Cliente buscarCliente(String CPF) throws ClienteNaoEncontradoException {
+        for (Cliente cliente : this.clientes) {
+            if (cliente.getCpf().equals(CPF)) {
+                exibirDetalhesCliente(cliente);
                 return cliente;
             }
         }
-        throw new ClienteNaoEncontradoException("Cliente com CPF " + cpf + " não encontrado.");
+        throw new ClienteNaoEncontradoException("Cliente com CPF " + CPF + " não encontrado.");
+    }
+
+    private void exibirDetalhesCliente(Cliente cliente) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        System.out.println("Detalhes do Cliente:");
+        System.out.println("Nome: " + cliente.getNome());
+        System.out.println("CPF: " + cliente.getCpf());
+        if (cliente.getDataNascimento() != null) {
+            System.out.println("Data de Nascimento: " + sdf.format(cliente.getDataNascimento()));
+        } else {
+            System.out.println("Data de Nascimento: Não disponível");
+        }
     }
 
     // Método para editar cliente
@@ -83,8 +98,16 @@ public class ClienteController {
                     break;
                 case 2:
                     System.out.print("Digite a nova data de nascimento (DD/MM/AAAA): ");
-                    cliente.setDataNascimento(scanner.nextLine());
-                    System.out.println("Data de nascimento atualizada com sucesso.");
+                    String dataString = scanner.nextLine();
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    sdf.setLenient(false);  // Isso garante que as datas devem ser estritamente conforme o formato especificado
+                    try {
+                        Date novaDataNascimento = sdf.parse(dataString);
+                        cliente.setDataNascimento(novaDataNascimento);
+                        System.out.println("Data de nascimento atualizada com sucesso.");
+                    } catch (ParseException e) {
+                        System.out.println("Formato de data inválido. Por favor, use o formato DD/MM/AAAA.");
+                    }
                     break;
                 case 0:
                     System.out.println("Voltando...");

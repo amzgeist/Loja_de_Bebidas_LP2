@@ -79,7 +79,7 @@ public class Main {
                     break;
                 case 3:
                     System.out.print("Digite o CPF do cliente que deseja buscar: ");
-                    String cpf = scanner.nextLine();  // Certifique-se de usar nextLine() para ler toda a linha de entrada
+                    String cpf = scanner.nextLine();
                     try {
                         Cliente clienteEncontrado = clienteController.buscarCliente(cpf);  // Passando a String do CPF diretamente
                         if (clienteEncontrado != null) {
@@ -202,11 +202,7 @@ public class Main {
                     }
                     break;
                 case 4:  // Atualizar Estoque
-                    System.out.print("Digite o código do produto para atualizar o estoque: ");
-                    int codigo = Integer.parseInt(scanner.nextLine());
-                    System.out.print("Digite o novo estoque: ");
-                    int novoEstoque = Integer.parseInt(scanner.nextLine());
-                    produtoController.atualizarEstoque(codigo, novoEstoque);
+                    produtoController.atualizarEstoque(scanner);
                     break;
                 case 0:
                     running = false;

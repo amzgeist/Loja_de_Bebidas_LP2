@@ -1,11 +1,13 @@
 package dados;
 
+import java.util.Date;
+
 public class Cliente {
     private String nome;
     private String cpf;
-    private String dataNascimento;
+    private Date dataNascimento;
 
-    public Cliente(String nome, String cpf, String dataNascimento) {
+    public Cliente(String nome, String cpf, Date dataNascimento) {
         this.nome = nome;
         this.cpf = cpf;
         this.dataNascimento = dataNascimento;
@@ -23,15 +25,11 @@ public class Cliente {
         return cpf;
     }
 
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public String getDataNascimento() {
+    public Date getDataNascimento() {
         return dataNascimento;
     }
 
-    public void setDataNascimento(String dataNascimento) {
+    public void setDataNascimento(Date dataNascimento) {
         this.dataNascimento = dataNascimento;
     }
 

@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 import dados.Produto;
 import excecoes.ProdutoJaExisteException;
+import excecoes.ProdutoNaoEncontradoException;
 
 public class ProdutoController {
     private final List<Produto> produtos;
@@ -70,7 +71,8 @@ public class ProdutoController {
     }
 
     public Produto buscarProduto(int codigo) {
-        for (Produto produto : produtos) {
+
+        for (Produto produto : this.produtos) {
             if (produto.getCodigo() == codigo) {
                 return produto;
             }
@@ -78,13 +80,34 @@ public class ProdutoController {
         return null;
     }
 
-    public void atualizarEstoque(int codigo, int novoEstoque) {
+    public void atualizarEstoque(Scanner scanner) {
+        System.out.print("Digite o código do produto para atualizar o estoque: ");
+        int codigo = scanner.nextInt();  // Lê o código do produto
+        scanner.nextLine();  // Limpa o buffer do scanner após ler um número
+
         Produto produto = buscarProduto(codigo);
+
         if (produto != null) {
-            produto.setEstoque(novoEstoque);
-            System.out.println("Estoque atualizado com sucesso para o Produto: " + produto.getNome());
+            // Exibindo as informações do produto antes de solicitar o novo estoque
+            System.out.println("Informações do Produto:");
+            System.out.println("Nome: " + produto.getNome());
+            System.out.println("Preço: R$" + produto.getPreco());
+            System.out.println("Estoque atual: " + produto.getEstoque());
+
+            // Solicita o novo valor de estoque
+            System.out.print("Digite o novo valor do estoque: ");
+            int novoEstoque = scanner.nextInt();
+            scanner.nextLine();
+
+            // Verificação e atualização do estoque
+            if (novoEstoque >= 0) {
+                produto.setEstoque(novoEstoque);
+                System.out.println("Estoque do produto '" + produto.getNome() + "' atualizado com sucesso para " + novoEstoque + ".");
+            } else {
+                System.out.println("O valor do estoque não pode ser negativo.");
+            }
         } else {
-            System.out.println("Produto não encontrado.");
+            System.out.println("Produto com código " + codigo + " não encontrado.");
         }
     }
 
