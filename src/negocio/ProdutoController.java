@@ -8,6 +8,11 @@ public class ProdutoController {
     private ArrayList<Produto> produtos;
     private static ProdutoController instance;
 
+    private ProdutoController() {
+        produtos = new ArrayList<>();
+        inicializarProdutos();
+    }
+
     public static ProdutoController getInstance() {
         if (instance == null) {
             instance = new ProdutoController();
