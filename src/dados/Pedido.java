@@ -1,6 +1,7 @@
 package dados;
 
-import java.util.HashMap;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Map;
 
 public class Pedido {
@@ -11,18 +12,20 @@ public class Pedido {
     private String endereco;
     private Map<Produto, Integer> produtos;
     private String formaPagamento;
-    private String status;
     private String statusPagamento;
+    private String status;
+    private Date dataHora;
 
     public Pedido(Cliente cliente, Funcionario funcionario, String endereco, Map<Produto, Integer> produtos, int formaPagamento) {
         this.codigo = proximoCodigo++;
         this.cliente = cliente;
         this.funcionario = funcionario;
         this.endereco = endereco;
-        this.produtos = new HashMap<>(produtos);
+        this.produtos = produtos;
         setFormaPagamento(formaPagamento);
-        this.status = "Aguardando confirmação";
         this.statusPagamento = "Aguardando pagamento";
+        this.status = "Aguardando confirmação";
+        this.dataHora = new Date(); // Armazena a data e hora atual
     }
 
     private void setFormaPagamento(int formaPagamento) {
@@ -43,6 +46,31 @@ public class Pedido {
                 this.formaPagamento = "Não especificado";
                 break;
         }
+    }
+
+    public void exibirResumo() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        System.out.println("-----------------------------");
+        System.out.println("Código do Pedido: " + codigo);
+        System.out.println("Data e Hora: " + sdf.format(dataHora));
+        System.out.println("Cliente: " + cliente.getNome() + " (CPF: " + cliente.getCpf() + ")");
+        System.out.println("Funcionário: " + funcionario.getNome() + " (Código: " + funcionario.getCodigoFunc() + ")");
+        System.out.println("Endereço: " + endereco);
+        System.out.println("Itens do Pedido:");
+        double total = 0;
+        for (Map.Entry<Produto, Integer> entry : produtos.entrySet()) {
+            Produto produto = entry.getKey();
+            int quantidade = entry.getValue();
+            double subtotal = produto.getPreco() * quantidade;
+            System.out.println("  Produto: " + produto.getNome() + " (Código: " + produto.getCodigo() + ")");
+            System.out.println("  Quantidade: " + quantidade);
+            System.out.println("  Subtotal: R$ " + subtotal);
+            total += subtotal;
+        }
+        System.out.println("Total do Pedido: R$ " + total);
+        System.out.println("Forma de Pagamento: " + formaPagamento);
+        System.out.println("Status do Pagamento: " + statusPagamento);
+        System.out.println("Status: " + status);
     }
 
     public int getCodigo() {

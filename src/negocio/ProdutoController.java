@@ -1,19 +1,18 @@
 package negocio;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
-
 import dados.Produto;
 import excecoes.ProdutoJaExisteException;
 import excecoes.ProdutoNaoEncontradoException;
 
+import java.util.ArrayList;
+import java.util.Scanner;
+
 public class ProdutoController {
-    private final List<Produto> produtos;
+    private ArrayList<Produto> produtos;
     private static ProdutoController instance;
 
     private ProdutoController() {
-        produtos = new ArrayList<>();
+        this.produtos = new ArrayList<>();
         inicializarProdutos();
     }
 
@@ -24,20 +23,18 @@ public class ProdutoController {
         return instance;
     }
 
-    // Método para cadastrar um novo produto, aceitando Scanner como argumento
     public void cadastrarProduto(Scanner scanner) throws ProdutoJaExisteException {
         System.out.print("Digite o nome do produto: ");
         String nome = scanner.nextLine();
-
         System.out.print("Digite o preço do produto: ");
         float preco = Float.parseFloat(scanner.nextLine());
-
-        System.out.print("Digite o estoque inicial do produto: ");
+        System.out.print("Digite o estoque do produto: ");
         int estoque = Integer.parseInt(scanner.nextLine());
 
-        // Verificação se o produto já existe
-        if (produtoExiste(nome)) {
-            throw new ProdutoJaExisteException("Produto com o nome " + nome + " já está cadastrado.");
+        for (Produto produto : produtos) {
+            if (produto.getNome().equalsIgnoreCase(nome)) {
+                throw new ProdutoJaExisteException("Produto com este nome já existe.");
+            }
         }
 
         Produto produto = new Produto(nome, preco, estoque);
@@ -45,69 +42,69 @@ public class ProdutoController {
         System.out.println("Produto cadastrado com sucesso. Código do Produto: " + produto.getCodigo());
     }
 
-    // Método para verificar se um produto com o mesmo nome já existe
-    private boolean produtoExiste(String nome) {
-        for (Produto produto : produtos) {
-            if (produto.getNome().equalsIgnoreCase(nome)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public void listarProdutos() {
         System.out.println("----- Lista de Produtos -----");
-        if (produtos.isEmpty()) {
-            System.out.println("Nenhum produto cadastrado.");
-        } else {
-            for (Produto produto : produtos) {
-                System.out.println("Código: " + produto.getCodigo());
-                System.out.println("Nome: " + produto.getNome());
-                System.out.println("Preço: R$ " + produto.getPreco());
-                System.out.println("Estoque: " + produto.getEstoque());
-                System.out.println();
-            }
+        for (Produto produto : produtos) {
+            System.out.println("Código: " + produto.getCodigo());
+            System.out.println("Nome: " + produto.getNome());
+            System.out.println("Preço: R$ " + produto.getPreco());
+            System.out.println("Estoque: " + produto.getEstoque());
+            System.out.println();
         }
     }
 
-    public Produto buscarProduto(int codigo) {
-
-        for (Produto produto : this.produtos) {
+    public Produto buscarProduto(int codigo) throws ProdutoNaoEncontradoException {
+        for (Produto produto : produtos) {
             if (produto.getCodigo() == codigo) {
                 return produto;
             }
         }
-        return null;
+        throw new ProdutoNaoEncontradoException("Produto com código " + codigo + " não encontrado.");
     }
 
-    public void atualizarEstoque(Scanner scanner) {
-        System.out.print("Digite o código do produto para atualizar o estoque: ");
-        int codigo = scanner.nextInt();  // Lê o código do produto
-        scanner.nextLine();  // Limpa o buffer do scanner após ler um número
-
-        Produto produto = buscarProduto(codigo);
-
-        if (produto != null) {
-            // Exibindo as informações do produto antes de solicitar o novo estoque
-            System.out.println("Informações do Produto:");
+    public void atualizarProduto(Scanner scanner) {
+        System.out.print("Digite o código do produto que deseja atualizar: ");
+        int codigo = Integer.parseInt(scanner.nextLine());
+        try {
+            Produto produto = buscarProduto(codigo);
+            System.out.println("Produto encontrado:");
             System.out.println("Nome: " + produto.getNome());
-            System.out.println("Preço: R$" + produto.getPreco());
-            System.out.println("Estoque atual: " + produto.getEstoque());
+            System.out.println("Preço: R$ " + produto.getPreco());
+            System.out.println("Estoque: " + produto.getEstoque());
+            System.out.println("1. Atualizar Nome");
+            System.out.println("2. Atualizar Preço");
+            System.out.println("3. Atualizar Estoque");
+            System.out.println("4. Voltar");
+            System.out.print("Escolha uma opção: ");
+            int opcao = Integer.parseInt(scanner.nextLine());
 
-            // Solicita o novo valor de estoque
-            System.out.print("Digite o novo valor do estoque: ");
-            int novoEstoque = scanner.nextInt();
-            scanner.nextLine();
-
-            // Verificação e atualização do estoque
-            if (novoEstoque >= 0) {
-                produto.setEstoque(novoEstoque);
-                System.out.println("Estoque do produto '" + produto.getNome() + "' atualizado com sucesso para " + novoEstoque + ".");
-            } else {
-                System.out.println("O valor do estoque não pode ser negativo.");
+            switch (opcao) {
+                case 1:
+                    System.out.print("Digite o novo nome: ");
+                    String novoNome = scanner.nextLine();
+                    produto.setNome(novoNome);
+                    System.out.println("Nome do produto atualizado com sucesso.");
+                    break;
+                case 2:
+                    System.out.print("Digite o novo preço: ");
+                    float novoPreco = Float.parseFloat(scanner.nextLine());
+                    produto.setPreco(novoPreco);
+                    System.out.println("Preço do produto atualizado com sucesso.");
+                    break;
+                case 3:
+                    System.out.print("Digite o novo estoque: ");
+                    int novoEstoque = Integer.parseInt(scanner.nextLine());
+                    produto.setEstoque(novoEstoque);
+                    System.out.println("Estoque do produto atualizado com sucesso.");
+                    break;
+                case 4:
+                    System.out.println("Voltando ao menu anterior...");
+                    break;
+                default:
+                    System.out.println("Opção inválida.");
             }
-        } else {
-            System.out.println("Produto com código " + codigo + " não encontrado.");
+        } catch (ProdutoNaoEncontradoException e) {
+            System.out.println(e.getMessage());
         }
     }
 

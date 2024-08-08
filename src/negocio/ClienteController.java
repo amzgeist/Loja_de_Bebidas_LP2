@@ -16,6 +16,8 @@ public class ClienteController {
 
     private ClienteController() {
         clientes = new ArrayList<>();
+        inicializarClientes();
+
     }
 
     public static ClienteController getInstance() {
@@ -120,4 +122,15 @@ public class ClienteController {
             System.out.println(e.getMessage());
         }
     }
+
+    private void inicializarClientes() {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            clientes.add(new Cliente("Antonio Dias", "11122233344", sdf.parse("02/04/2000")));
+            clientes.add(new Cliente("Patricia Gomes", "22233344455", sdf.parse("15/07/1998")));
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
