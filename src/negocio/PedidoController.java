@@ -222,14 +222,19 @@ public class PedidoController {
     }
 
     private void cancelarPedido(Pedido pedido) {
+        // Verifica se o pedido já foi faturado
         if (pedido.getStatus().equals("Pedido Faturado. Aguardando montagem") ||
                 pedido.getStatus().equals("Aguardando entrega") ||
                 pedido.getStatus().equals("Pedido a caminho") ||
                 pedido.getStatus().equals("Entrega concluída. Pedido Finalizado.")) {
             System.out.println("Não é possível cancelar um pedido que já foi faturado ou entregue.");
+        } else if (pedido.getStatus().contains("Faturado")) {
+            // Verifica se o status contém "Faturado", indicando que pelo menos uma fatura foi emitida
+            System.out.println("Não é possível cancelar o pedido, pois já foi emitida pelo menos uma fatura.");
         } else {
             pedido.setStatus("Cancelado");
             System.out.println("Pedido cancelado com sucesso.");
         }
     }
+    
 }
