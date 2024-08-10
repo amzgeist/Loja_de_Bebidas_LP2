@@ -1,18 +1,14 @@
 package gui;
 
 import dados.Funcionario;
-import excecoes.ClienteNaoEncontradoException;
-import excecoes.FuncionarioInativoException;
-import excecoes.FuncionarioNaoEncontradoException;
-import excecoes.ProdutoJaExisteException;
-import excecoes.ProdutoNaoEncontradoException;
+import excecoes.*;
 import negocio.Fachada;
 
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws ProdutoNaoEncontradoException {
+    public static void main(String[] args) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException {
         Scanner scanner = new Scanner(System.in);
         Fachada fachada = new Fachada();
         int opcao;
@@ -183,7 +179,7 @@ public class Main {
         } while (opcaoProdutos != 0);
     }
 
-    private static void gerenciarPedidos(Fachada fachada, Scanner scanner) throws ProdutoNaoEncontradoException {
+    private static void gerenciarPedidos(Fachada fachada, Scanner scanner) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException {
         int opcaoPedidos;
         do {
             System.out.println("----- Gerenciar Pedidos -----");
@@ -196,21 +192,27 @@ public class Main {
 
             switch (opcaoPedidos) {
                 case 1:
-                    fachada.criarPedido(scanner);
+                    try {
+                        fachada.criarPedido(scanner);
+                    } catch (Exception e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
                 case 2:
                     fachada.listarPedidos();
                     break;
                 case 3:
-                    System.out.print("Digite o número do pedido: ");
+                    System.out.print("Digite o número do pedido que deseja buscar: ");
                     int numeroPedido = Integer.parseInt(scanner.nextLine());
-                    fachada.buscarPedido(numeroPedido);
-                    break;
-                case 0:
-                    System.out.println("Voltando ao menu principal...");
+                    try {
+                        fachada.buscarPedido(numeroPedido, scanner);
+                    } catch (PedidoNaoEncontradoException e) {
+                        System.out.println(e.getMessage());
+                    }
                     break;
                 default:
                     System.out.println("Opção inválida.");
+                    break;
             }
         } while (opcaoPedidos != 0);
     }

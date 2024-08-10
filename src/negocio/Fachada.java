@@ -2,11 +2,7 @@ package negocio;
 
 import dados.Cliente;
 import dados.Funcionario;
-import excecoes.ClienteNaoEncontradoException;
-import excecoes.FuncionarioInativoException;
-import excecoes.FuncionarioNaoEncontradoException;
-import excecoes.ProdutoJaExisteException;
-import excecoes.ProdutoNaoEncontradoException;
+import excecoes.*;
 
 import java.util.Scanner;
 
@@ -32,8 +28,7 @@ public class Fachada {
     }
 
     public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException {
-        clienteController.buscarCliente(cpf);
-        return null;
+        return clienteController.buscarCliente(cpf);
     }
 
     public void cadastrarFuncionario(Scanner scanner) {
@@ -56,7 +51,6 @@ public class Fachada {
         funcionarioController.reativarFuncionario(codigo);
     }
 
-
     public void cadastrarProduto(Scanner scanner) throws ProdutoJaExisteException {
         produtoController.cadastrarProduto(scanner);
     }
@@ -73,15 +67,15 @@ public class Fachada {
         produtoController.atualizarProduto(scanner);
     }
 
-    public void criarPedido(Scanner scanner) throws ProdutoNaoEncontradoException {
-        pedidoController.criarPedido(scanner);
+    public void criarPedido(Scanner scanner) throws ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
+        pedidoController.criarPedido(scanner, produtoController, clienteController, funcionarioController);
     }
 
     public void listarPedidos() {
         pedidoController.listarPedidos();
     }
 
-    public void buscarPedido(int numeroPedido) {
-        pedidoController.buscarPedido(numeroPedido);
+    public void buscarPedido(int numeroPedido, Scanner scanner) throws PedidoNaoEncontradoException {
+        pedidoController.buscarPedido(numeroPedido, scanner);
     }
 }
