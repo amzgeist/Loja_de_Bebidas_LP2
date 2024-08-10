@@ -78,4 +78,42 @@ public class Fachada {
     public void buscarPedido(int numeroPedido, Scanner scanner) throws PedidoNaoEncontradoException {
         pedidoController.buscarPedido(numeroPedido, scanner);
     }
+
+    public void calcularSalarioFuncionario(int codigo, Scanner scanner) {
+        try {
+            Funcionario funcionario = funcionarioController.buscarFuncionario(codigo);
+            double salarioCalculado = 0;
+            
+            switch (funcionario.getTipo()) {
+                case "Assalariado":
+                    salarioCalculado = funcionario.getSalario();
+                    break;
+                case "Comissionado":
+                    System.out.print("Digite o valor das vendas realizadas no mês: ");
+                    double vendas = Double.parseDouble(scanner.nextLine());
+                    System.out.print("Digite a porcentagem de comissão (em decimal, por exemplo, 0.10 para 10%): ");
+                    double percentualComissao = Double.parseDouble(scanner.nextLine());
+                    salarioCalculado = funcionario.getSalario() + (vendas * percentualComissao);
+                    break;
+                case "Por Hora":
+                    System.out.print("Digite o número de horas trabalhadas: ");
+                    int horasTrabalhadas = Integer.parseInt(scanner.nextLine());
+                    salarioCalculado = funcionario.getSalario() * horasTrabalhadas;
+                    break;
+                case "Salário Base e Comissão":
+                    System.out.print("Digite o valor das vendas realizadas no mês: ");
+                    double vendasBaseComissao = Double.parseDouble(scanner.nextLine());
+                    System.out.print("Digite a porcentagem de comissão (em decimal, por exemplo, 0.10 para 10%): ");
+                    double percentualComissaoBase = Double.parseDouble(scanner.nextLine());
+                    salarioCalculado = funcionario.getSalario() + (vendasBaseComissao * percentualComissaoBase);
+                    break;
+                default:
+                    System.out.println("Tipo de funcionário desconhecido.");
+            }
+            
+            System.out.println("Salário Calculado: R$ " + salarioCalculado);
+        } catch (FuncionarioNaoEncontradoException | FuncionarioInativoException e) {
+            System.out.println(e.getMessage());
+        }
+    }
 }

@@ -89,10 +89,11 @@ public class Main {
             System.out.println("2. Listar Funcionários");
             System.out.println("3. Buscar Funcionário");
             System.out.println("4. Atualizar Funcionário");
+            System.out.println("5. Calcular Salário Funcionário");
             System.out.println("0. Voltar ao menu principal");
             System.out.print("Escolha uma opção: ");
             opcaoFuncionarios = Integer.parseInt(scanner.nextLine());
-
+    
             switch (opcaoFuncionarios) {
                 case 1:
                     fachada.cadastrarFuncionario(scanner);
@@ -126,6 +127,11 @@ public class Main {
                 case 4:
                     fachada.atualizarFuncionario(scanner);
                     break;
+                case 5:
+                    System.out.print("Digite o código do funcionário para calcular o salário: ");
+                    int codigoCalculo = Integer.parseInt(scanner.nextLine());
+                    fachada.calcularSalarioFuncionario(codigoCalculo, scanner);
+                    break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
                     break;
@@ -134,6 +140,7 @@ public class Main {
             }
         } while (opcaoFuncionarios != 0);
     }
+    
 
     private static void gerenciarProdutos(Fachada fachada, Scanner scanner) {
         int opcaoProdutos;
