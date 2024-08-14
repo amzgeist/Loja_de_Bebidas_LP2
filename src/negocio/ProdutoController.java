@@ -56,6 +56,10 @@ public class ProdutoController {
     public Produto buscarProduto(int codigo) throws ProdutoNaoEncontradoException {
         for (Produto produto : produtos) {
             if (produto.getCodigo() == codigo) {
+                System.out.println("Produto encontrado:");
+                System.out.println("Nome: " + produto.getNome());
+                System.out.println("Preço: R$ " + produto.getPreco());
+                System.out.println("Estoque: " + produto.getEstoque());
                 return produto;
             }
         }

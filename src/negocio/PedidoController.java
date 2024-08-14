@@ -59,18 +59,62 @@ public class PedidoController {
             System.out.print("Digite a quantidade: ");
             int quantidade = Integer.parseInt(scanner.nextLine());
 
-            produtos.put(produto, quantidade);
+            if (produto.getEstoque() < quantidade) {
+                System.out.println("Quantidade indisponível em estoque. Restam apenas " + produto.getEstoque() + " unidades.");
+            } else {
+                produtos.put(produto, quantidade);
+                produto.setEstoque(produto.getEstoque() - quantidade);  // Subtraindo do estoque
+                System.out.println("Produto adicionado ao pedido.");
+            }
 
-            System.out.print("Deseja adicionar, remover produtos ou finalizar pedido? (Adicionar/Remover/Finalizar): ");
-            String escolha = scanner.nextLine();
+            System.out.print("Escolha uma opção: 1- Adicionar Produto\n 2- Remover Produto\n 3- Finalizar Pedido: ");
+            String opcao = scanner.nextLine().toLowerCase();
 
-            if (escolha.equalsIgnoreCase("Remover")) {
-                System.out.print("Digite o código do produto a ser removido: ");
-                int codigoRemover = Integer.parseInt(scanner.nextLine());
-                Produto produtoRemover = produtoController.buscarProduto(codigoRemover);
-                produtos.remove(produtoRemover);
-            } else if (escolha.equalsIgnoreCase("Finalizar")) {
-                continuar = false;
+            switch (opcao) {
+                case "1":  // Adicionar Produto
+                    System.out.print("Digite o código do produto: ");
+                    int codProduto = Integer.parseInt(scanner.nextLine());
+                    Produto produtoo = produtoController.buscarProduto(codProduto);
+
+                    System.out.print("Digite a quantidade: ");
+                    int quantidadee = Integer.parseInt(scanner.nextLine());
+
+                    if (produto.getEstoque() < quantidadee) {
+                        System.out.println("Quantidade indisponível em estoque. Restam apenas " + produtoo.getEstoque() + " unidades.");
+                    } else {
+                        produtos.put(produto, quantidade);
+                        produto.setEstoque(produto.getEstoque() - quantidade);  // Subtraindo do estoque
+                        System.out.println("Produto adicionado ao pedido.");
+                    }
+                    break;
+
+                case "2":  // Remover Produto
+                    if (produtos.isEmpty()) {
+                        System.out.println("Não há produtos no pedido para remover.");
+                        break;
+                    }
+                    System.out.print("Digite o código do produto que deseja remover: ");
+                    int codigoRemover = Integer.parseInt(scanner.nextLine());
+                    Produto produtoRemover = produtoController.buscarProduto(codigoRemover);
+                    if (produtos.containsKey(produtoRemover)) {
+                        int qtdRemovida = produtos.remove(produtoRemover);
+                        produtoRemover.setEstoque(produtoRemover.getEstoque() + qtdRemovida);  // Devolvendo ao estoque
+                        System.out.println("Produto removido do pedido.");
+                    } else {
+                        System.out.println("Produto não encontrado no pedido.");
+                    }
+                    break;
+
+                case "3":  // Finalizar Pedido
+                    if (produtos.isEmpty()) {
+                        System.out.println("Não é possível finalizar um pedido sem produtos. Adicione pelo menos um produto.");
+                    } else {
+                        continuar = false;
+                    }
+                    break;
+
+                default:
+                    System.out.println("Opção inválida. Por favor, escolha uma opção válida.");
             }
         }
 
