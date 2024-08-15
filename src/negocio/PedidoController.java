@@ -5,7 +5,6 @@ import dados.Funcionario;
 import dados.Pedido;
 import dados.Produto;
 import excecoes.*;
-
 import java.util.*;
 
 public class PedidoController {
@@ -23,124 +22,144 @@ public class PedidoController {
         return instance;
     }
 
-    public void criarPedido(Scanner scanner, ProdutoController produtoController, ClienteController clienteController, FuncionarioController funcionarioController)
-            throws ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
-
+    public void criarPedido(Scanner scanner, ProdutoController produtoController, ClienteController clienteController, FuncionarioController funcionarioController) throws FuncionarioInativoException, ProdutoNaoEncontradoException {
         System.out.print("Digite o CPF do cliente: ");
         String cpfCliente = scanner.nextLine();
         Cliente cliente;
+
         try {
             cliente = clienteController.buscarCliente(cpfCliente);
         } catch (ClienteNaoEncontradoException e) {
-            System.out.println("Cliente não encontrado. Deseja cadastrar um novo cliente? (Sim/Não)");
-            if (scanner.nextLine().equalsIgnoreCase("Sim")) {
+            System.out.println("Cliente não encontrado.");
+            System.out.print("Deseja cadastrar um novo cliente? (Sim/Não): ");
+            String resposta = scanner.nextLine().trim().toLowerCase();
+            if (resposta.equals("sim")) {
                 clienteController.cadastrarCliente(scanner);
-                cliente = clienteController.buscarCliente(cpfCliente);
+                cliente = clienteController.buscarCliente(cpfCliente); // Tentativa de buscar o cliente novamente após cadastro
             } else {
                 return;
             }
         }
 
-        System.out.print("Digite o código do funcionário: ");
+        System.out.print("Digite o código do funcionário que está criando o pedido: ");
         int codFunc = Integer.parseInt(scanner.nextLine());
-        Funcionario funcionario = funcionarioController.buscarFuncionario(codFunc);
+        Funcionario funcionario;
 
-        System.out.println("Funcionário: " + funcionario.getNome() + " (CPF: " + funcionario.getCpf() + ")");
-
-        Map<Produto, Integer> produtos = new HashMap<>();
-        boolean continuar = true;
-
-        while (continuar) {
-            System.out.print("Digite o código do produto: ");
-            int codigoProduto = Integer.parseInt(scanner.nextLine());
-            Produto produto = produtoController.buscarProduto(codigoProduto);
-
-            System.out.println("Produto: " + produto.getNome() + " (Preço: R$ " + produto.getPreco() + ")");
-            System.out.print("Digite a quantidade: ");
-            int quantidade = Integer.parseInt(scanner.nextLine());
-
-            if (produto.getEstoque() < quantidade) {
-                System.out.println("Quantidade indisponível em estoque. Restam apenas " + produto.getEstoque() + " unidades.");
+        try {
+            funcionario = funcionarioController.buscarFuncionario(codFunc);
+        } catch (FuncionarioNaoEncontradoException e) {
+            System.out.println(e.getMessage());
+            return;
+        } catch (FuncionarioInativoException e) {
+            System.out.println("Funcionário inativo. Deseja reativá-lo? (Sim/Não): ");
+            String resposta = scanner.nextLine().trim().toLowerCase();
+            if (resposta.equals("sim")) {
+                funcionarioController.reativarFuncionario(codFunc);
+                funcionario = funcionarioController.buscarFuncionario(codFunc);
             } else {
-                produtos.put(produto, quantidade);
-                produto.setEstoque(produto.getEstoque() - quantidade);  // Subtraindo do estoque
-                System.out.println("Produto adicionado ao pedido.");
-            }
-
-            System.out.print("Escolha uma opção: 1- Adicionar Produto\n 2- Remover Produto\n 3- Finalizar Pedido: ");
-            String opcao = scanner.nextLine().toLowerCase();
-
-            switch (opcao) {
-                case "1":  // Adicionar Produto
-                    System.out.print("Digite o código do produto: ");
-                    int codProduto = Integer.parseInt(scanner.nextLine());
-                    Produto produtoo = produtoController.buscarProduto(codProduto);
-
-                    System.out.print("Digite a quantidade: ");
-                    int quantidadee = Integer.parseInt(scanner.nextLine());
-
-                    if (produto.getEstoque() < quantidadee) {
-                        System.out.println("Quantidade indisponível em estoque. Restam apenas " + produtoo.getEstoque() + " unidades.");
-                    } else {
-                        produtos.put(produto, quantidade);
-                        produto.setEstoque(produto.getEstoque() - quantidade);  // Subtraindo do estoque
-                        System.out.println("Produto adicionado ao pedido.");
-                    }
-                    break;
-
-                case "2":  // Remover Produto
-                    if (produtos.isEmpty()) {
-                        System.out.println("Não há produtos no pedido para remover.");
-                        break;
-                    }
-                    System.out.print("Digite o código do produto que deseja remover: ");
-                    int codigoRemover = Integer.parseInt(scanner.nextLine());
-                    Produto produtoRemover = produtoController.buscarProduto(codigoRemover);
-                    if (produtos.containsKey(produtoRemover)) {
-                        int qtdRemovida = produtos.remove(produtoRemover);
-                        produtoRemover.setEstoque(produtoRemover.getEstoque() + qtdRemovida);  // Devolvendo ao estoque
-                        System.out.println("Produto removido do pedido.");
-                    } else {
-                        System.out.println("Produto não encontrado no pedido.");
-                    }
-                    break;
-
-                case "3":  // Finalizar Pedido
-                    if (produtos.isEmpty()) {
-                        System.out.println("Não é possível finalizar um pedido sem produtos. Adicione pelo menos um produto.");
-                    } else {
-                        continuar = false;
-                    }
-                    break;
-
-                default:
-                    System.out.println("Opção inválida. Por favor, escolha uma opção válida.");
+                return;
             }
         }
 
         System.out.print("Digite o endereço para entrega: ");
         String endereco = scanner.nextLine();
 
-        System.out.println("Escolha a forma de pagamento: ");
+        Map<Produto, Integer> produtos = new HashMap<>();
+        while (true) {
+            System.out.print("Digite o código do produto: ");
+            int codigoProduto = Integer.parseInt(scanner.nextLine());
+            Produto produto;
+
+            try {
+                produto = produtoController.buscarProduto(codigoProduto);
+            } catch (ProdutoNaoEncontradoException e) {
+                System.out.println(e.getMessage());
+                continue;
+            }
+
+            System.out.print("Digite a quantidade: ");
+            int quantidade = Integer.parseInt(scanner.nextLine());
+
+            if (quantidade > produto.getEstoque()) {
+                System.out.println("Estoque insuficiente. Quantidade disponível: " + produto.getEstoque());
+                continue;
+            }
+
+            produtos.put(produto, quantidade);
+            produto.setEstoque(produto.getEstoque() - quantidade);
+
+            System.out.print("Deseja adicionar, remover produtos ou finalizar pedido? (Adicionar/Remover/Finalizar): ");
+            String opcao = scanner.nextLine().trim().toLowerCase();
+
+            switch (opcao) {
+                case "adicionar":
+                    continue;
+                case "remover":
+                    System.out.print("Digite o código do produto que deseja remover: ");
+                    int codigoRemover = Integer.parseInt(scanner.nextLine());
+                    Produto produtoRemover = produtoController.buscarProduto(codigoRemover);
+                    if (produtos.containsKey(produtoRemover)) {
+                        int quantidadeRemovida = produtos.remove(produtoRemover);
+                        produto.setEstoque(produto.getEstoque() + quantidadeRemovida);
+                        System.out.println("Produto removido do pedido.");
+                    } else {
+                        System.out.println("Produto não encontrado no pedido.");
+                    }
+                    break;
+                case "finalizar":
+                    if (produtos.isEmpty()) {
+                        System.out.println("Não é possível finalizar um pedido sem produtos.");
+                    } else {
+                        break;
+                    }
+                default:
+                    System.out.println("Opção inválida.");
+                    continue;
+            }
+            break;
+        }
+
+        System.out.println("Escolha a forma de pagamento:");
         System.out.println("1. Cartão de Crédito");
         System.out.println("2. Cartão de Débito");
         System.out.println("3. Pix");
         System.out.println("4. Dinheiro");
-        int formaPagamento = Integer.parseInt(scanner.nextLine());
+        int formaPagamentoEscolha = Integer.parseInt(scanner.nextLine());
+        String formaPagamento;
 
-        Pedido pedido = new Pedido(cliente, funcionario, endereco, produtos, getFormaPagamento(formaPagamento));
+        switch (formaPagamentoEscolha) {
+            case 1:
+                formaPagamento = "Cartão de Crédito";
+                break;
+            case 2:
+                formaPagamento = "Cartão de Débito";
+                break;
+            case 3:
+                formaPagamento = "Pix";
+                break;
+            case 4:
+                formaPagamento = "Dinheiro";
+                break;
+            default:
+                formaPagamento = "Não especificado";
+                System.out.println("Opção de pagamento inválida. Usando valor padrão: Não especificado.");
+                break;
+        }
 
+        Pedido pedido = new Pedido(cliente, funcionario, endereco, produtos, formaPagamento);
         pedido.exibirResumo();
 
         System.out.print("Deseja confirmar o pedido? (Sim/Não): ");
-        if (scanner.nextLine().equalsIgnoreCase("Sim")) {
-            pedido.setStatus("Pedido Confirmado. Aguardando Faturamento");
+        String confirmacao = scanner.nextLine().trim().toLowerCase();
+
+        if (confirmacao.equals("sim")) {
             pedidos.add(pedido);
-            System.out.println("Pedido criado com sucesso!");
+            System.out.println("Pedido confirmado com sucesso. Status: " + pedido.getStatus());
         } else {
             System.out.println("Pedido cancelado.");
         }
     }
+
 
     private String getFormaPagamento(int opcao) {
         switch (opcao) {
@@ -185,95 +204,139 @@ public class PedidoController {
         }
     }
 
-    public Pedido encontrarPedidoPorCodigo(int numeroPedido) throws PedidoNaoEncontradoException {
+
+    public Pedido buscarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
         for (Pedido pedido : pedidos) {
-            if (pedido.getCodigo() == numeroPedido) {
+            if (pedido.getCodigo() == codigoPedido) {
                 return pedido;
             }
         }
-        throw new PedidoNaoEncontradoException("Pedido com número " + numeroPedido + " não encontrado.");
+        throw new PedidoNaoEncontradoException("Pedido com código " + codigoPedido + " não encontrado.");
     }
 
-    public void buscarPedido(int numeroPedido, Scanner scanner) {
-        try {
-            Pedido pedido = encontrarPedidoPorCodigo(numeroPedido); // Chama o método correto
-            pedido.exibirResumo();
+    public void exibirDetalhesPedido(Pedido pedido, Scanner scanner) {
+        pedido.exibirResumo(); // Exibe o resumo do pedido
 
-            // Menu para opções adicionais após exibir o resumo do pedido
-            boolean sair = false;
-            while (!sair) {
-                System.out.println("Escolha uma opção:");
-                System.out.println("1. Atualizar status do pedido");
-                System.out.println("2. Cancelar pedido");
-                System.out.println("3. Voltar ao menu anterior");
-                System.out.print("Opção: ");
-                int opcao = Integer.parseInt(scanner.nextLine());
+        System.out.println("O que você deseja fazer?");
+        System.out.println("1. Atualizar status do pedido");
+        System.out.println("2. Cancelar pedido");
+        System.out.println("3. Adicionar pagamento");
+        System.out.println("4. Voltar ao menu anterior");
 
-                switch (opcao) {
-                    case 1:
-                        atualizarStatusPedido(pedido, scanner);
-                        break;
-                    case 2:
-                        cancelarPedido(pedido);
-                        sair = true;
-                        break;
-                    case 3:
-                        sair = true;
-                        break;
-                    default:
-                        System.out.println("Opção inválida. Tente novamente.");
+        int opcao = Integer.parseInt(scanner.nextLine());
+
+        switch (opcao) {
+            case 1:
+                atualizarStatusPedido(pedido.getCodigo(), scanner);
+                break;
+            case 2:
+                try {
+                    cancelarPedido(pedido.getCodigo());
+                } catch (PedidoNaoEncontradoException e) {
+                    System.out.println(e.getMessage());
                 }
+                break;
+            case 3:
+                adicionarPagamento(pedido, scanner);
+                break;
+            case 4:
+                // Voltar ao menu anterior
+                break;
+            default:
+                System.out.println("Opção inválida.");
+                break;
+        }
+    }
+
+    public void atualizarStatusPedido(int codigoPedido, Scanner scanner) {
+        try {
+            Pedido pedido = buscarPedido(codigoPedido); // Correto: `codigoPedido` é um `int`, que é esperado pelo método.
+
+
+            if (pedido.getStatus().equals("Pedido Confirmado. Aguardando Faturamento")) {
+                System.out.println("Deseja confirmar o pagamento do pedido? (Sim/Não): ");
+                String resposta = scanner.nextLine();
+                if (resposta.equalsIgnoreCase("Sim") && pedido.getValorRecebido() >= pedido.calcularTotal()) {
+                    pedido.setStatus("Pedido Faturado. Aguardando montagem");
+                    System.out.println("Status do pedido atualizado para 'Pedido Faturado. Aguardando montagem'.");
+                } else {
+                    System.out.println("O pedido não pode ser atualizado. Verifique se o pagamento foi feito.");
+                }
+            } else if (pedido.getStatus().equals("Pedido Faturado. Aguardando montagem")) {
+                System.out.println("Deseja seguir com a entrega? (Sim/Não): ");
+                String resposta = scanner.nextLine();
+                if (resposta.equalsIgnoreCase("Sim")) {
+                    pedido.setStatus("Aguardando entrega");
+                    System.out.println("Status do pedido atualizado para 'Aguardando entrega'.");
+                } else {
+                    System.out.println("Operação cancelada.");
+                }
+            } else if (pedido.getStatus().equals("Aguardando entrega")) {
+                System.out.println("Deseja confirmar a saída do pedido? (Sim/Não): ");
+                String resposta = scanner.nextLine();
+                if (resposta.equalsIgnoreCase("Sim")) {
+                    pedido.setStatus("Pedido a caminho");
+                    System.out.println("Status do pedido atualizado para 'Pedido a caminho'.");
+                } else {
+                    System.out.println("Operação cancelada.");
+                }
+            } else if (pedido.getStatus().equals("Pedido a caminho")) {
+                System.out.println("Deseja confirmar a entrega do pedido? (Sim/Não): ");
+                String resposta = scanner.nextLine();
+                if (resposta.equalsIgnoreCase("Sim")) {
+                    pedido.setStatus("Entrega concluída. Pedido Finalizado");
+                    System.out.println("Status do pedido atualizado para 'Entrega concluída. Pedido Finalizado'.");
+                } else {
+                    System.out.println("Operação cancelada.");
+                }
+            } else {
+                System.out.println("O pedido não pode ser atualizado.");
             }
         } catch (PedidoNaoEncontradoException e) {
             System.out.println(e.getMessage());
         }
     }
 
-    private void atualizarStatusPedido(Pedido pedido, Scanner scanner) {
-        String statusAtual = pedido.getStatus();
-        switch (statusAtual) {
-            case "Pedido Confirmado. Aguardando Faturamento":
-                System.out.println("Deseja confirmar o pagamento do pedido? (Sim/Não)");
-                if (scanner.nextLine().equalsIgnoreCase("Sim")) {
-                    pedido.setStatus("Pedido Faturado. Aguardando montagem");
-                    System.out.println("Status atualizado para 'Pedido Faturado. Aguardando montagem'.");
-                }
-                break;
-            case "Pedido Faturado. Aguardando montagem":
-                System.out.println("Deseja seguir com a entrega? (Sim/Não)");
-                if (scanner.nextLine().equalsIgnoreCase("Sim")) {
-                    pedido.setStatus("Aguardando entrega");
-                    System.out.println("Status atualizado para 'Aguardando entrega'.");
-                }
-                break;
-            case "Aguardando entrega":
-                System.out.println("Deseja confirmar a saída do pedido? (Sim/Não)");
-                if (scanner.nextLine().equalsIgnoreCase("Sim")) {
-                    pedido.setStatus("Pedido a caminho");
-                    System.out.println("Status atualizado para 'Pedido a caminho'.");
-                }
-                break;
-            case "Pedido a caminho":
-                System.out.println("Deseja confirmar a entrega do pedido? (Sim/Não)");
-                if (scanner.nextLine().equalsIgnoreCase("Sim")) {
-                    pedido.setStatus("Entrega concluída. Pedido Finalizado.");
-                    System.out.println("Status atualizado para 'Entrega concluída. Pedido Finalizado.'.");
-                }
-                break;
-            default:
-                System.out.println("O pedido já foi finalizado ou cancelado e não pode mais ser atualizado.");
+
+    public void cancelarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
+        Pedido pedido = buscarPedido(codigoPedido);
+        if (pedido.getStatus().equals("Pedido Faturado. Aguardando montagem") ||
+                pedido.getStatus().equals("Pedido a caminho") ||
+                pedido.getStatus().equals("Entrega concluída. Pedido Finalizado")) {
+            System.out.println("Não é possível cancelar um pedido já faturado ou em andamento.");
+        } else {
+            // Revertendo o estoque dos produtos
+            for (Map.Entry<Produto, Integer> entry : pedido.getProdutos().entrySet()) {
+                Produto produto = entry.getKey();
+                int quantidade = entry.getValue();
+                produto.setEstoque(produto.getEstoque() + quantidade);
+            }
+            pedido.setStatus("Cancelado");
+            System.out.println("Pedido cancelado com sucesso.");
         }
     }
 
-    private void cancelarPedido(Pedido pedido) {
-        if (pedido.getStatus().equals("Pedido Faturado. Aguardando montagem") ||
-                pedido.getStatus().equals("Aguardando entrega") ||
-                pedido.getStatus().equals("Pedido a caminho") ||
-                pedido.getStatus().equals("Entrega concluída. Pedido Finalizado.")) {
-            System.out.println("Não é possível cancelar um pedido que já foi faturado ou entregue.");
+    public void adicionarPagamento(Pedido pedido, Scanner scanner) {
+        double total = pedido.calcularTotal();
+        double valorRestante = total - pedido.getValorRecebido();
+
+        System.out.println("Total do pedido: R$" + total);
+        System.out.println("Valor já pago: R$" + pedido.getValorRecebido());
+        System.out.println("Valor restante: R$" + valorRestante);
+
+        System.out.print("Digite o valor do pagamento: ");
+        double valorPagamento = Double.parseDouble(scanner.nextLine());
+
+        if (valorPagamento > 0 && valorPagamento <= valorRestante) {
+            pedido.setValorRecebido(pedido.getValorRecebido() + valorPagamento);
+            System.out.println("Pagamento adicionado com sucesso.");
+
+            if (pedido.getValorRecebido() == total) {
+                pedido.setStatusPagamento("Pago");
+                System.out.println("Pagamento completo. Status do pedido atualizado para 'Pago'.");
+            }
         } else {
-            pedido.setStatus("Cancelado");
-            System.out.println("Pedido cancelado com sucesso.");
+            System.out.println("Valor inválido. O pagamento deve ser maior que zero e não pode exceder o valor restante.");
         }
     }
 }

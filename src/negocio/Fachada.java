@@ -3,6 +3,7 @@ package negocio;
 import dados.Cliente;
 import dados.Funcionario;
 import excecoes.*;
+import dados.Pedido;
 
 import java.util.Scanner;
 
@@ -75,8 +76,22 @@ public class Fachada {
         pedidoController.listarPedidos();
     }
 
-    public void buscarPedido(int numeroPedido, Scanner scanner) throws PedidoNaoEncontradoException {
-        pedidoController.buscarPedido(numeroPedido, scanner);
+    public void cancelarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
+        pedidoController.cancelarPedido(codigoPedido);
+    }
+
+
+    public Pedido buscarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
+        return pedidoController.buscarPedido(codigoPedido);
+    }
+
+    public void exibirDetalhesPedido(int numeroPedido, Scanner scanner) throws PedidoNaoEncontradoException {
+        Pedido pedido = pedidoController.buscarPedido(numeroPedido);  // Busca o pedido usando o número
+        pedidoController.exibirDetalhesPedido(pedido, scanner);  // Exibe os detalhes do pedido
+    }
+
+    public void adicionarPagamento(Pedido pedido, Scanner scanner) {
+        pedidoController.adicionarPagamento(pedido, scanner);
     }
 
     public void calcularSalarioFuncionario(int codigo, Scanner scanner) {

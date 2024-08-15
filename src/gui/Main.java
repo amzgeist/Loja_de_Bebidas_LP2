@@ -208,11 +208,12 @@ public class Main {
                 case 2:
                     fachada.listarPedidos();
                     break;
+
                 case 3:
-                    System.out.print("Digite o número do pedido que deseja buscar: ");
-                    int numeroPedido = Integer.parseInt(scanner.nextLine());
                     try {
-                        fachada.buscarPedido(numeroPedido, scanner);
+                        System.out.print("Digite o número do pedido que deseja buscar: ");
+                        int numeroPedido = Integer.parseInt(scanner.nextLine());
+                        fachada.exibirDetalhesPedido(numeroPedido, scanner);
                     } catch (PedidoNaoEncontradoException e) {
                         System.out.println(e.getMessage());
                     }
