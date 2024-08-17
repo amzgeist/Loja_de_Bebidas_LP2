@@ -1,10 +1,9 @@
 package negocio;
 
-import dados.Cliente;
-import dados.Funcionario;
+import dados.*;
 import excecoes.*;
-import dados.Pedido;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Fachada {
@@ -13,122 +12,95 @@ public class Fachada {
     private ProdutoController produtoController;
     private PedidoController pedidoController;
 
-    public Fachada() {
+    public Fachada() throws SQLException {
         this.clienteController = ClienteController.getInstance();
         this.funcionarioController = FuncionarioController.getInstance();
         this.produtoController = ProdutoController.getInstance();
         this.pedidoController = PedidoController.getInstance();
     }
 
-    public void cadastrarCliente(Scanner scanner) {
+    // Métodos relacionados a Clientes
+    public void cadastrarCliente(Scanner scanner) throws SQLException {
         clienteController.cadastrarCliente(scanner);
     }
 
-    public void listarClientes() {
+    public void listarClientes() throws SQLException {
         clienteController.listarClientes();
     }
 
-    public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException {
+    public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException, SQLException {
         return clienteController.buscarCliente(cpf);
     }
 
-    public void cadastrarFuncionario(Scanner scanner) {
+    public void atualizarCliente(Scanner scanner) throws SQLException {
+        clienteController.atualizarCliente(scanner);
+    }
+
+    // Métodos relacionados a Funcionários
+    public void cadastrarFuncionario(Scanner scanner) throws SQLException {
         funcionarioController.cadastrarFuncionario(scanner);
     }
 
-    public void listarFuncionarios() {
+    public void listarFuncionarios() throws SQLException {
         funcionarioController.listarFuncionarios();
     }
 
-    public Funcionario buscarFuncionario(int codigo) throws FuncionarioNaoEncontradoException, FuncionarioInativoException {
+    public Funcionario buscarFuncionario(int codigo) throws SQLException, FuncionarioNaoEncontradoException, FuncionarioInativoException {
         return funcionarioController.buscarFuncionario(codigo);
     }
 
-    public void atualizarFuncionario(Scanner scanner) {
+    public void atualizarFuncionario(Scanner scanner) throws SQLException, FuncionarioInativoException {
         funcionarioController.atualizarFuncionario(scanner);
     }
 
-    public void reativarFuncionario(int codigo) {
+    public void reativarFuncionario(int codigo) throws SQLException {
         funcionarioController.reativarFuncionario(codigo);
     }
 
-    public void cadastrarProduto(Scanner scanner) throws ProdutoJaExisteException {
+    public void desativarFuncionario(int codigo) throws SQLException {
+        funcionarioController.desativarFuncionario(codigo);
+    }
+
+    // Métodos relacionados a Produtos
+    public void cadastrarProduto(Scanner scanner) throws SQLException, ProdutoJaExisteException {
         produtoController.cadastrarProduto(scanner);
     }
 
-    public void listarProdutos() {
+    public void listarProdutos() throws SQLException {
         produtoController.listarProdutos();
     }
 
-    public void buscarProduto(int codigoProduto) throws ProdutoNaoEncontradoException {
-        produtoController.buscarProduto(codigoProduto);
+    public Produto buscarProduto(int codigoProduto) throws ProdutoNaoEncontradoException, SQLException {
+        return produtoController.buscarProduto(codigoProduto); // Retorno do produto
     }
 
-    public void atualizarProduto(Scanner scanner) {
+    public void atualizarProduto(Scanner scanner) throws SQLException {
         produtoController.atualizarProduto(scanner);
     }
 
-    public void criarPedido(Scanner scanner) throws ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
+    // Métodos relacionados a Pedidos
+    public void criarPedido(Scanner scanner) throws SQLException, ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
         pedidoController.criarPedido(scanner, produtoController, clienteController, funcionarioController);
     }
 
-    public void listarPedidos() {
+    public void listarPedidos() throws SQLException {
         pedidoController.listarPedidos();
     }
 
-    public void cancelarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
-        pedidoController.cancelarPedido(codigoPedido);
+    public void exibirDetalhesPedido(int codigoPedido, Scanner scanner) throws PedidoNaoEncontradoException, SQLException {
+        Pedido pedido = pedidoController.buscarPedido(codigoPedido, scanner);
+        pedidoController.exibirDetalhesPedido(pedido, scanner);
     }
 
-
-    public Pedido buscarPedido(int codigoPedido) throws PedidoNaoEncontradoException {
-        return pedidoController.buscarPedido(codigoPedido);
+    public void buscarPedido(int numeroPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.buscarPedido(numeroPedido, scanner);
     }
 
-    public void exibirDetalhesPedido(int numeroPedido, Scanner scanner) throws PedidoNaoEncontradoException {
-        Pedido pedido = pedidoController.buscarPedido(numeroPedido);  // Busca o pedido usando o número
-        pedidoController.exibirDetalhesPedido(pedido, scanner);  // Exibe os detalhes do pedido
+    public void atualizarStatusPedido(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.atualizarStatusPedido(codigoPedido, scanner);
     }
 
-    public void adicionarPagamento(Pedido pedido, Scanner scanner) {
-        pedidoController.adicionarPagamento(pedido, scanner);
-    }
-
-    public void calcularSalarioFuncionario(int codigo, Scanner scanner) {
-        try {
-            Funcionario funcionario = funcionarioController.buscarFuncionario(codigo);
-            double salarioCalculado = 0;
-            
-            switch (funcionario.getTipo()) {
-                case "Assalariado":
-                    salarioCalculado = funcionario.getSalario();
-                    break;
-                case "Comissionado":
-                    System.out.print("Digite o valor das vendas realizadas no mês: ");
-                    double vendas = Double.parseDouble(scanner.nextLine());
-                    System.out.print("Digite a porcentagem de comissão (em decimal, por exemplo, 0.10 para 10%): ");
-                    double percentualComissao = Double.parseDouble(scanner.nextLine());
-                    salarioCalculado = funcionario.getSalario() + (vendas * percentualComissao);
-                    break;
-                case "Por Hora":
-                    System.out.print("Digite o número de horas trabalhadas: ");
-                    int horasTrabalhadas = Integer.parseInt(scanner.nextLine());
-                    salarioCalculado = funcionario.getSalario() * horasTrabalhadas;
-                    break;
-                case "Salário Base e Comissão":
-                    System.out.print("Digite o valor das vendas realizadas no mês: ");
-                    double vendasBaseComissao = Double.parseDouble(scanner.nextLine());
-                    System.out.print("Digite a porcentagem de comissão (em decimal, por exemplo, 0.10 para 10%): ");
-                    double percentualComissaoBase = Double.parseDouble(scanner.nextLine());
-                    salarioCalculado = funcionario.getSalario() + (vendasBaseComissao * percentualComissaoBase);
-                    break;
-                default:
-                    System.out.println("Tipo de funcionário desconhecido.");
-            }
-            
-            System.out.println("Salário Calculado: R$ " + salarioCalculado);
-        } catch (FuncionarioNaoEncontradoException | FuncionarioInativoException e) {
-            System.out.println(e.getMessage());
-        }
+    public void adicionarPagamento(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.adicionarPagamento(codigoPedido, scanner);
     }
 }

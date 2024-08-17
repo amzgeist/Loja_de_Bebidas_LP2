@@ -1,6 +1,7 @@
 package dados;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ public class Pedido {
     private String statusPagamento;
     private String status;
     private Date dataHora;
+    private Date dataVencimento;
     private double valorRecebido;
 
     public Pedido(Cliente cliente, Funcionario funcionario, String endereco, Map<Produto, Integer> produtos, String formaPagamento) {
@@ -32,7 +34,9 @@ public class Pedido {
         this.statusPagamento = "Aguardando pagamento";
         this.status = "Pedido Confirmado. Aguardando Faturamento";
         this.dataHora = new Date(); // Armazena a data e hora atual
+        this.dataVencimento = calculateDataVencimento(); // Set due date
         this.valorRecebido = 0.0;
+        this.statusPagamento = "Aguardando pagamento";
     }
 
     public void exibirResumo() {
@@ -91,6 +95,9 @@ public class Pedido {
     public void setStatusPagamento(String statusPagamento) {
         this.statusPagamento = statusPagamento;
     }
+    public Date getDataVencimento() {
+        return dataVencimento;
+    }
 
     public void setValorRecebido(double valorRecebido) {
         this.valorRecebido = valorRecebido;
@@ -112,6 +119,18 @@ public class Pedido {
         return valorRecebido;
     }
 
+    public void setCodigo(int codigo) {
+        this.codigo = codigo;
+    }
+
+    public Date getDataHora() {
+        return dataHora;
+    }
+
+
+    public void setDataHora(Date dataHora) {
+        this.dataHora = dataHora;
+    }
 
     public void adicionarPagamento(double valorPagamento) {
         if (valorPagamento <= 0) {
@@ -148,6 +167,13 @@ public class Pedido {
             }
         }
         return 0;
+    }
+
+    private Date calculateDataVencimento() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(this.dataHora);
+        calendar.add(Calendar.DAY_OF_YEAR, 5);
+        return calendar.getTime();
     }
 
     public void atualizarStatus(String novoStatus) {

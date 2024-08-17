@@ -5,9 +5,9 @@ import dados.Funcionario;
 public class FuncionarioInativoException extends Exception {
     private Funcionario funcionario;
 
-    public FuncionarioInativoException(String message, Funcionario funcionario) {
-        super(message);
-        this.funcionario = funcionario;
+
+    public FuncionarioInativoException(String nomeFuncionario) {
+        super("Funcionário " + nomeFuncionario + " está inativo.");
     }
 
     public Funcionario getFuncionario() {

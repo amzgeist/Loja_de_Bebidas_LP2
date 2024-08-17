@@ -1,19 +1,20 @@
 package negocio;
 
 import dados.Produto;
+import dados.ProdutoDAO;
 import excecoes.ProdutoJaExisteException;
 import excecoes.ProdutoNaoEncontradoException;
 
-import java.util.ArrayList;
+import java.sql.SQLException;
+import java.util.List;
 import java.util.Scanner;
 
 public class ProdutoController {
-    private ArrayList<Produto> produtos;
     private static ProdutoController instance;
+    private ProdutoDAO produtoDAO;
 
     private ProdutoController() {
-        this.produtos = new ArrayList<>();
-        inicializarProdutos();
+        this.produtoDAO = ProdutoDAO.getInstance();
     }
 
     public static ProdutoController getInstance() {
@@ -23,7 +24,8 @@ public class ProdutoController {
         return instance;
     }
 
-    public void cadastrarProduto(Scanner scanner) throws ProdutoJaExisteException {
+
+    public void cadastrarProduto(Scanner scanner) throws SQLException, ProdutoJaExisteException {
         System.out.print("Digite o nome do produto: ");
         String nome = scanner.nextLine();
         System.out.print("Digite o preço do produto: ");
@@ -31,92 +33,111 @@ public class ProdutoController {
         System.out.print("Digite o estoque do produto: ");
         int estoque = Integer.parseInt(scanner.nextLine());
 
-        for (Produto produto : produtos) {
-            if (produto.getNome().equalsIgnoreCase(nome)) {
-                throw new ProdutoJaExisteException("Produto com este nome já existe.");
-            }
-        }
-
         Produto produto = new Produto(nome, preco, estoque);
-        produtos.add(produto);
-        System.out.println("Produto cadastrado com sucesso. Código do Produto: " + produto.getCodigo());
+        ProdutoDAO.getInstance().inserirProduto(produto);
+
+        System.out.println("Produto cadastrado com sucesso.");
     }
 
-    public void listarProdutos() {
-        System.out.println("----- Lista de Produtos -----");
-        for (Produto produto : produtos) {
+    public void listarProdutos() throws SQLException {
+        List<Produto> produtos = ProdutoDAO.getInstance().listarProdutos();
+        exibirProdutos(produtos);
+    }
+
+    public Produto buscarProduto(int codigoProduto) throws ProdutoNaoEncontradoException, SQLException {
+        Produto produto = produtoDAO.buscarProduto(codigoProduto);
+
+        if (produto != null) {
+            System.out.println("Produto encontrado:");
             System.out.println("Código: " + produto.getCodigo());
             System.out.println("Nome: " + produto.getNome());
             System.out.println("Preço: R$ " + produto.getPreco());
             System.out.println("Estoque: " + produto.getEstoque());
-            System.out.println();
+        } else {
+            throw new ProdutoNaoEncontradoException("Produto com código " + codigoProduto + " não encontrado.");
         }
+        return produto;
     }
 
-    public Produto buscarProduto(int codigo) throws ProdutoNaoEncontradoException {
-        for (Produto produto : produtos) {
-            if (produto.getCodigo() == codigo) {
-                System.out.println("Produto encontrado:");
-                System.out.println("Nome: " + produto.getNome());
-                System.out.println("Preço: R$ " + produto.getPreco());
-                System.out.println("Estoque: " + produto.getEstoque());
-                return produto;
-            }
-        }
-        throw new ProdutoNaoEncontradoException("Produto com código " + codigo + " não encontrado.");
-    }
-
-    public void atualizarProduto(Scanner scanner) {
+    public void atualizarProduto(Scanner scanner) throws SQLException {
         System.out.print("Digite o código do produto que deseja atualizar: ");
         int codigo = Integer.parseInt(scanner.nextLine());
-        try {
-            Produto produto = buscarProduto(codigo);
-            System.out.println("Produto encontrado:");
-            System.out.println("Nome: " + produto.getNome());
-            System.out.println("Preço: R$ " + produto.getPreco());
-            System.out.println("Estoque: " + produto.getEstoque());
-            System.out.println("1. Atualizar Nome");
-            System.out.println("2. Atualizar Preço");
-            System.out.println("3. Atualizar Estoque");
-            System.out.println("4. Voltar");
-            System.out.print("Escolha uma opção: ");
-            int opcao = Integer.parseInt(scanner.nextLine());
 
-            switch (opcao) {
-                case 1:
-                    System.out.print("Digite o novo nome: ");
-                    String novoNome = scanner.nextLine();
-                    produto.setNome(novoNome);
-                    System.out.println("Nome do produto atualizado com sucesso.");
-                    break;
-                case 2:
-                    System.out.print("Digite o novo preço: ");
-                    float novoPreco = Float.parseFloat(scanner.nextLine());
-                    produto.setPreco(novoPreco);
-                    System.out.println("Preço do produto atualizado com sucesso.");
-                    break;
-                case 3:
-                    System.out.print("Digite o novo estoque: ");
-                    int novoEstoque = Integer.parseInt(scanner.nextLine());
-                    produto.setEstoque(novoEstoque);
-                    System.out.println("Estoque do produto atualizado com sucesso.");
-                    break;
-                case 4:
-                    System.out.println("Voltando ao menu anterior...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
+        Produto produto;
+        try {
+            produto = produtoDAO.buscarProduto(codigo);
+            if (produto == null) {
+                throw new ProdutoNaoEncontradoException("Produto não encontrado.");
             }
         } catch (ProdutoNaoEncontradoException e) {
             System.out.println(e.getMessage());
+            return;
+        }
+
+        System.out.println("Produto encontrado: ");
+        System.out.println("Nome: " + produto.getNome());
+        System.out.println("Preço: " + produto.getPreco());
+        System.out.println("Estoque: " + produto.getEstoque());
+
+        System.out.println("O que deseja atualizar?");
+        System.out.println("1. Nome");
+        System.out.println("2. Preço");
+        System.out.println("3. Estoque");
+        System.out.println("4. Voltar");
+
+        int opcao = Integer.parseInt(scanner.nextLine());
+
+        switch (opcao) {
+            case 1:
+                System.out.print("Digite o novo nome do produto: ");
+                String novoNome = scanner.nextLine();
+                produto.setNome(novoNome);
+                produtoDAO.atualizarProduto(produto);
+                System.out.println("Nome atualizado com sucesso.");
+                break;
+
+            case 2:
+                System.out.print("Digite o novo preço do produto: ");
+                float novoPreco = Float.parseFloat(scanner.nextLine());
+                produto.setPreco(novoPreco);
+                produtoDAO.atualizarProduto(produto);
+                System.out.println("Preço atualizado com sucesso.");
+                break;
+
+            case 3:
+                System.out.print("Digite o novo estoque do produto: ");
+                int novoEstoque = Integer.parseInt(scanner.nextLine());
+                produto.setEstoque(novoEstoque);
+                produtoDAO.atualizarProduto(produto);
+                System.out.println("Estoque atualizado com sucesso.");
+                break;
+
+            case 4:
+                System.out.println("Voltando ao menu anterior...");
+                return;
+
+            default:
+                System.out.println("Opção inválida.");
+                break;
         }
     }
 
-    private void inicializarProdutos() {
-        produtos.add(new Produto("Coca cola lata", 3.50f, 30));
-        produtos.add(new Produto("Fanta lata", 3.00f, 20));
-        produtos.add(new Produto("Brahma 600Ml", 6.00f, 30));
-        produtos.add(new Produto("Monster 473Ml", 9.00f, 25));
-        produtos.add(new Produto("Água sem gás 500Ml", 1.5f, 50));
+    public void exibirProdutos(List<Produto> produtos) {
+        if (produtos.isEmpty()) {
+            System.out.println("Nenhum produto cadastrado.");
+        } else {
+            for (Produto produto : produtos) {
+                System.out.println("Código: " + produto.getCodigo());
+                System.out.println("Nome: " + produto.getNome());
+                System.out.println("Preço: " + produto.getPreco());
+                System.out.println("Estoque: " + produto.getEstoque());
+                System.out.println("-------------------------");
+            }
+        }
     }
+
+    public void atualizarProdutoNoBanco(Produto produto) throws SQLException {
+        produtoDAO.atualizarProduto(produto);
+    }
+
 }

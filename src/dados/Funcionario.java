@@ -22,6 +22,10 @@ public class Funcionario {
         return codigoFunc;
     }
 
+    public void setCodigoFunc(int codigoFunc) {
+        this.codigoFunc = codigoFunc;
+    }
+
     public String getNome() {
         return nome;
     }

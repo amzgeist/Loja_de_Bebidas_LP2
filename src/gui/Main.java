@@ -4,11 +4,12 @@ import dados.Funcionario;
 import excecoes.*;
 import negocio.Fachada;
 
+import java.sql.SQLException;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException {
+    public static void main(String[] args) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException, SQLException {
         Scanner scanner = new Scanner(System.in);
         Fachada fachada = new Fachada();
         int opcao;
@@ -45,7 +46,7 @@ public class Main {
         } while (opcao != 0);
     }
 
-    private static void gerenciarClientes(Fachada fachada, Scanner scanner) {
+    private static void gerenciarClientes(Fachada fachada, Scanner scanner) throws SQLException {
         int opcaoClientes;
         do {
             System.out.println("----- Gerenciar Clientes -----");
@@ -81,7 +82,7 @@ public class Main {
         } while (opcaoClientes != 0);
     }
 
-    private static void gerenciarFuncionarios(Fachada fachada, Scanner scanner) {
+    private static void gerenciarFuncionarios(Fachada fachada, Scanner scanner) throws SQLException, FuncionarioInativoException {
         int opcaoFuncionarios;
         do {
             System.out.println("----- Gerenciar Funcionários -----");
@@ -130,7 +131,7 @@ public class Main {
                 case 5:
                     System.out.print("Digite o código do funcionário para calcular o salário: ");
                     int codigoCalculo = Integer.parseInt(scanner.nextLine());
-                    fachada.calcularSalarioFuncionario(codigoCalculo, scanner);
+                    /*fachada.calcularSalarioFuncionario(codigoCalculo, scanner);*/
                     break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
@@ -142,7 +143,7 @@ public class Main {
     }
     
 
-    private static void gerenciarProdutos(Fachada fachada, Scanner scanner) {
+    private static void gerenciarProdutos(Fachada fachada, Scanner scanner) throws SQLException {
         int opcaoProdutos;
         do {
             System.out.println("----- Gerenciar Produtos -----");
@@ -175,7 +176,11 @@ public class Main {
                     }
                     break;
                 case 4:
-                    fachada.atualizarProduto(scanner);
+                    try {
+                        fachada.atualizarProduto(scanner);
+                    } catch (SQLException e) {
+                        System.out.println("Erro ao atualizar o produto: " + e.getMessage());
+                    }
                     break;
                 case 0:
                     System.out.println("Voltando ao menu principal...");
@@ -186,7 +191,7 @@ public class Main {
         } while (opcaoProdutos != 0);
     }
 
-    private static void gerenciarPedidos(Fachada fachada, Scanner scanner) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException {
+    private static void gerenciarPedidos(Fachada fachada, Scanner scanner) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException, SQLException {
         int opcaoPedidos;
         do {
             System.out.println("----- Gerenciar Pedidos -----");
