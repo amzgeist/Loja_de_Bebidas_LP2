@@ -35,6 +35,22 @@ public class FuncionarioDAO {
         }
     }
 
+    public String buscarUltimoCodigo() throws SQLException {
+        String sql = "SELECT MAX(codigo_func) AS ultimo_codigo FROM funcionarios";
+        String ultimoCodigo = "0"; // Código inicial, caso não haja funcionários ainda
+
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                ultimoCodigo = rs.getString("ultimo_codigo");
+            }
+        }
+
+        return ultimoCodigo;
+    }
+
     public Funcionario buscarFuncionarioPorCodigo(int codigo) {
         String sql = "SELECT codigo, nome, cpf, tipo, salario, ativo FROM funcionarios WHERE codigo = ?";
         Funcionario funcionario = null;

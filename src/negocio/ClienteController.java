@@ -55,6 +55,11 @@ public class ClienteController {
         }
     }
 
+    public void cadastrarCliente(String nome, String cpf, Date dataNascimento) throws SQLException {
+        Cliente cliente = new Cliente(nome, cpf, dataNascimento);
+        clienteDAO.cadastrarCliente(cliente);
+    }
+
     public void listarClientes() throws SQLException {
         List<Cliente> clientes = ClienteDAO.getInstance().listarClientes();
         exibirClientes(clientes);

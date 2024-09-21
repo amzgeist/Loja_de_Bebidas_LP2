@@ -1,5 +1,7 @@
 package dados;
 
+import excecoes.ClienteNaoEncontradoException;
+import excecoes.FuncionarioNaoEncontradoException;
 import excecoes.PedidoNaoEncontradoException;
 import excecoes.ProdutoNaoEncontradoException;
 
@@ -51,6 +53,41 @@ public class PedidoDAO {
         }
     }
 
+    public void criarPedido(String cpfCliente, int codFuncionario, String endereco, Map<Integer, Integer> produtos, String formaPagamento)
+            throws SQLException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException, ProdutoNaoEncontradoException {
+
+        // Implementação da lógica para inserir o pedido no banco de dados, verificando se o cliente, funcionário e produtos existem
+        String sqlPedido = "INSERT INTO pedidos (cliente_cpf, funcionario_codigo, endereco, forma_pagamento) VALUES (?, ?, ?, ?)";
+
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sqlPedido, Statement.RETURN_GENERATED_KEYS)) {
+
+            // Insere o pedido no banco de dados
+            stmt.setString(1, cpfCliente);
+            stmt.setInt(2, codFuncionario);
+            stmt.setString(3, endereco);
+            stmt.setString(4, formaPagamento);
+            stmt.executeUpdate();
+
+            // Recupera o ID gerado do pedido
+            ResultSet generatedKeys = stmt.getGeneratedKeys();
+            if (generatedKeys.next()) {
+                int pedidoId = generatedKeys.getInt(1);
+
+                // Insere os produtos relacionados ao pedido
+                for (Map.Entry<Integer, Integer> entry : produtos.entrySet()) {
+                    int produtoCodigo = entry.getKey();
+                    int quantidade = entry.getValue();
+
+                    // Chama o método que insere os produtos no pedido
+                    inserirProdutosPedido(pedidoId, produtoCodigo, quantidade);
+                }
+            } else {
+                throw new SQLException("Falha ao criar o pedido, nenhum ID foi retornado.");
+            }
+        }
+    }
+
     public void inserirProdutosPedido(int pedidoId, Map<Produto, Integer> produtos) throws SQLException {
         String sql = "INSERT INTO pedidos_produtos (pedido_id, produto_codigo, quantidade) VALUES (?, ?, ?)";
 
@@ -69,6 +106,18 @@ public class PedidoDAO {
             }
 
             stmt.executeBatch(); // Executa todas as inserções
+        }
+    }
+
+    private void inserirProdutosPedido(int pedidoId, int produtoCodigo, int quantidade) throws SQLException {
+        String sql = "INSERT INTO pedidos_produtos (pedido_id, produto_codigo, quantidade) VALUES (?, ?, ?)";
+
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, pedidoId);          // O ID do pedido
+            stmt.setInt(2, produtoCodigo);     // O código do produto
+            stmt.setInt(3, quantidade);        // A quantidade de produtos no pedido
+            stmt.executeUpdate();
         }
     }
 

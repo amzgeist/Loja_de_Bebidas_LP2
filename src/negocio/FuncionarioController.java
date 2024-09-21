@@ -56,6 +56,34 @@ public class FuncionarioController {
         }
     }
 
+    public void cadastrarFuncionario(String nome, String cpf, String tipo, double salario) {
+        try {
+            // Buscar o último código gerado
+            String ultimoCodigo = funcionarioDAO.buscarUltimoCodigo();
+
+            // Gerar o novo código incrementando o último código
+            int novoCodigoFunc = gerarCodigoCrescente(ultimoCodigo);
+
+            boolean ativo = true; // O funcionário é cadastrado como ativo por padrão
+
+            // Criando o objeto Funcionario com os 6 argumentos
+            Funcionario funcionario = new Funcionario(novoCodigoFunc, nome, cpf, tipo, salario, ativo);
+
+            // Inserindo no banco de dados
+            funcionarioDAO.inserirFuncionario(funcionario);
+            System.out.println("Funcionário cadastrado com sucesso!");
+
+        } catch (SQLException e) {
+            System.out.println("Erro ao cadastrar funcionário: " + e.getMessage());
+        }
+    }
+
+    private int gerarCodigoCrescente(String ultimoCodigo) {
+        // Converter o último código em número e incrementar
+        int proximoCodigo = Integer.parseInt(ultimoCodigo) + 1;
+        return proximoCodigo; // Retorna como String
+    }
+
     public void listarFuncionarios() throws SQLException {
         List<Funcionario> funcionarios = FuncionarioDAO.getInstance().listarFuncionarios();
         exibirFuncionarios(funcionarios);

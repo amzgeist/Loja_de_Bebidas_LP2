@@ -133,6 +133,13 @@ public class PedidoController {
         }
     }
 
+    public void criarPedido(String cpfCliente, int codFuncionario, String endereco, Map<Integer, Integer> produtos, String formaPagamento)
+            throws SQLException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException, ProdutoNaoEncontradoException {
+
+        // Chama o DAO para criar o pedido com base nas informações recebidas
+        pedidoDAO.criarPedido(cpfCliente, codFuncionario, endereco, produtos, formaPagamento);
+    }
+
 
     public void listarPedidos() throws SQLException {
         List<Pedido> pedidos = PedidoDAO.getInstance().listarPedidos();

@@ -39,6 +39,11 @@ public class ProdutoController {
         System.out.println("Produto cadastrado com sucesso.");
     }
 
+    public void cadastrarProduto(String nome, float preco, int estoque) throws SQLException, ProdutoJaExisteException {
+        Produto produto = new Produto(nome, preco, estoque);
+        produtoDAO.inserirProduto(produto);
+    }
+
     public void listarProdutos() throws SQLException {
         List<Produto> produtos = ProdutoDAO.getInstance().listarProdutos();
         exibirProdutos(produtos);

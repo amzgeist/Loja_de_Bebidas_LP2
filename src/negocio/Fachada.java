@@ -4,6 +4,9 @@ import dados.*;
 import excecoes.*;
 
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Fachada {
@@ -24,6 +27,15 @@ public class Fachada {
         clienteController.cadastrarCliente(scanner);
     }
 
+    public void cadastrarCliente(String nome, String cpf, String dataNascimento) {
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        try {
+            clienteController.cadastrarCliente(nome, cpf, sdf.parse(dataNascimento));
+        } catch (ParseException | SQLException e) {
+            System.out.println("Erro ao cadastrar cliente: " + e.getMessage());
+        }
+    }
+
     public void listarClientes() throws SQLException {
         clienteController.listarClientes();
     }
@@ -39,6 +51,10 @@ public class Fachada {
     // Métodos relacionados a Funcionários
     public void cadastrarFuncionario(Scanner scanner) throws SQLException {
         funcionarioController.cadastrarFuncionario(scanner);
+    }
+
+    public void cadastrarFuncionario(String nome, String cpf, String tipo, double salario) throws SQLException {
+        funcionarioController.cadastrarFuncionario(nome, cpf, tipo, salario);
     }
 
     public void listarFuncionarios() throws SQLException {
@@ -66,6 +82,14 @@ public class Fachada {
         produtoController.cadastrarProduto(scanner);
     }
 
+    public void cadastrarProduto(String nome, float preco, int estoque) {
+        try {
+            produtoController.cadastrarProduto(nome, preco, estoque);
+        } catch (SQLException | ProdutoJaExisteException e) {
+            System.out.println("Erro ao cadastrar produto: " + e.getMessage());
+        }
+    }
+
     public void listarProdutos() throws SQLException {
         produtoController.listarProdutos();
     }
@@ -81,6 +105,11 @@ public class Fachada {
     // Métodos relacionados a Pedidos
     public void criarPedido(Scanner scanner) throws SQLException, ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
         pedidoController.criarPedido(scanner, produtoController, clienteController, funcionarioController);
+    }
+
+    public void criarPedido(String cpfCliente, int codFuncionario, String endereco, Map<Integer, Integer> produtos, String formaPagamento)
+            throws SQLException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException, ProdutoNaoEncontradoException {
+        pedidoController.criarPedido(cpfCliente, codFuncionario, endereco, produtos, formaPagamento);
     }
 
     public void listarPedidos() throws SQLException {
