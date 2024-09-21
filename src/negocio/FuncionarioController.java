@@ -1,11 +1,12 @@
 package negocio;
 
+import dados.ConexaoDB;
 import dados.Funcionario;
 import dados.FuncionarioDAO;
 import excecoes.FuncionarioNaoEncontradoException;
 import excecoes.FuncionarioInativoException;
 
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -27,26 +28,32 @@ public class FuncionarioController {
         return instance;
     }
 
-    private void inicializarFuncionarios() {
-        funcionarios.add(new Funcionario("Jose Carlos", "11111122222", "Assalariado", 1600));
-        funcionarios.add(new Funcionario("Francisco Souza", "22222233333", "Comissionado", 1400));
-        funcionarios.add(new Funcionario("Marta da Silva", "33333344444", "Comissionado", 1450));
-    }
+    public void cadastrarFuncionario(Scanner scanner) {
+        try {
+            System.out.println("Digite o nome do funcionário:");
+            String nome = scanner.nextLine();
 
-    public void cadastrarFuncionario(Scanner scanner) throws SQLException {
-        System.out.print("Digite o nome do funcionário: ");
-        String nome = scanner.nextLine();
-        System.out.print("Digite o CPF do funcionário: ");
-        String cpf = scanner.nextLine();
-        System.out.print("Digite o tipo do funcionário (1 - Assalariado, 2 - Comissionado): ");
-        String tipo = scanner.nextLine().equals("1") ? "Assalariado" : "Comissionado";
-        System.out.print("Digite o salário do funcionário: ");
-        double salario = Double.parseDouble(scanner.nextLine());
+            System.out.println("Digite o CPF do funcionário:");
+            String cpf = scanner.nextLine();
 
-        Funcionario funcionario = new Funcionario(nome, cpf, tipo, salario);
-        FuncionarioDAO.getInstance().inserirFuncionario(funcionario);
+            System.out.println("Digite o tipo do funcionário (Assalariado/Comissionado):");
+            String tipo = scanner.nextLine();
 
-        System.out.println("Funcionário cadastrado com sucesso.");
+            System.out.println("Digite o salário do funcionário:");
+            double salario = Double.parseDouble(scanner.nextLine());
+
+            int codigofunc = funcionarioDAO.gerarCodigoUnico();
+
+            boolean statusativo = true;
+
+            Funcionario funcionario = new Funcionario(codigofunc,nome, cpf, tipo, salario, statusativo);
+
+            funcionarioDAO.inserirFuncionario(funcionario);
+            System.out.println("Funcionário cadastrado com sucesso!");
+
+        } catch (Exception e) {
+            System.out.println("Erro ao cadastrar funcionário: " + e.getMessage());
+        }
     }
 
     public void listarFuncionarios() throws SQLException {

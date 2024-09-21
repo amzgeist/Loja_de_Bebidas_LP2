@@ -3,6 +3,7 @@ package dados;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -25,7 +26,7 @@ public class Pedido {
     private double valorRecebido;
 
     public Pedido(Cliente cliente, Funcionario funcionario, String endereco, Map<Produto, Integer> produtos, String formaPagamento) {
-        this.codigo = proximoCodigo++;
+        this.codigo = codigo;
         this.cliente = cliente;
         this.funcionario = funcionario;
         this.endereco = endereco;
@@ -125,6 +126,30 @@ public class Pedido {
 
     public Date getDataHora() {
         return dataHora;
+    }
+
+    public void setDataVencimento(Date dataVencimento) {
+        this.dataVencimento = dataVencimento;
+    }
+
+    public void setCliente(Cliente cliente) {
+        this.cliente = cliente;
+    }
+
+    public void setFuncionario(Funcionario funcionario) {
+        this.funcionario = funcionario;
+    }
+
+    public void setEndereco(String endereco) {
+        this.endereco = endereco;
+    }
+
+    public void setProdutos(Map<Produto, Integer> produtos) {
+        this.produtos = produtos;
+    }
+
+    public void setFormaPagamento(String formaPagamento) {
+        this.formaPagamento = formaPagamento;
     }
 
 

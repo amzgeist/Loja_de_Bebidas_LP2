@@ -4,22 +4,25 @@ public class Funcionario {
     private static int proximoCodigo = 1;
     private int codigoFunc;
     private String nome;
-    private String cpf;
     private String tipo;
+    private String cpf;
     private double salario;
     private boolean ativo;
 
-    public Funcionario(String nome, String cpf, String tipo, double salario) {
-        this.codigoFunc = proximoCodigo++;
+    public Funcionario(int codigo, String nome, String cpf, String tipo, double salario, boolean ativo) {
+        this.codigoFunc = codigo;
         this.nome = nome;
         this.cpf = cpf;
         this.tipo = tipo;
         this.salario = salario;
-        this.ativo = true; // Todos os funcionários são inicialmente ativos.
+        this.ativo = ativo;
     }
 
     public int getCodigoFunc() {
         return codigoFunc;
+    }
+    private int gerarCodigoUnico() {
+        return proximoCodigo++;
     }
 
     public void setCodigoFunc(int codigoFunc) {

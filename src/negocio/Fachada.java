@@ -10,7 +10,7 @@ public class Fachada {
     private ClienteController clienteController;
     private FuncionarioController funcionarioController;
     private ProdutoController produtoController;
-    private PedidoController pedidoController;
+    private static PedidoController pedidoController;
 
     public Fachada() throws SQLException {
         this.clienteController = ClienteController.getInstance();
@@ -100,7 +100,7 @@ public class Fachada {
         pedidoController.atualizarStatusPedido(codigoPedido, scanner);
     }
 
-    public void adicionarPagamento(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
+    public static void adicionarPagamento(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
         pedidoController.adicionarPagamento(codigoPedido, scanner);
     }
 }

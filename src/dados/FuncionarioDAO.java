@@ -1,5 +1,7 @@
 package dados;
 
+import excecoes.FuncionarioNaoEncontradoException;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -33,51 +35,54 @@ public class FuncionarioDAO {
         }
     }
 
-    public Funcionario buscarFuncionarioPorCodigo(int codigo) throws SQLException {
-        String sql = "SELECT * FROM funcionarios WHERE codigo = ?";
+    public Funcionario buscarFuncionarioPorCodigo(int codigo) {
+        String sql = "SELECT codigo, nome, cpf, tipo, salario, ativo FROM funcionarios WHERE codigo = ?";
         Funcionario funcionario = null;
 
         try (Connection conn = ConexaoDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setInt(1, codigo);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                funcionario = new Funcionario(rs.getString("nome"), rs.getString("cpf"),
-                        rs.getString("tipo"), rs.getDouble("salario"));
-                funcionario.setAtivo(rs.getBoolean("ativo"));
-                funcionario.setCodigoFunc(rs.getInt("codigo"));
+                funcionario = new Funcionario(
+                        rs.getInt("codigo"),  // Código do funcionário como String
+                        rs.getString("nome"),                 // Nome do funcionário
+                        rs.getString("cpf"),                  // CPF do funcionário
+                        rs.getString("tipo"),                 // Tipo do funcionário
+                        rs.getDouble("salario"),              // Salário do funcionário
+                        rs.getBoolean("ativo")                // Status ativo do funcionário
+                );
             }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
 
         return funcionario;
     }
 
+
     public List<Funcionario> listarFuncionarios() throws SQLException {
         List<Funcionario> funcionarios = new ArrayList<>();
-        String sql = "SELECT codigo, nome, cpf, tipo, salario, ativo FROM funcionarios";
 
-        try (Connection conn = ConexaoDB.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
+        String sql = "SELECT codigo, nome, cpf, tipo, salario, ativo FROM funcionarios";
+        try (Connection connection = ConexaoDB.getConnection();
+             Statement stmt = connection.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
 
             while (rs.next()) {
-                int id = rs.getInt("codigo");
-                String nome = rs.getString("nome");
-                String cpf = rs.getString("cpf");
-                String tipo = rs.getString("tipo");
-                double salario = rs.getDouble("salario");
-                boolean ativo = rs.getBoolean("ativo");
-
-                Funcionario funcionario = new Funcionario(nome, cpf, tipo, salario);
-                funcionario.setCodigoFunc(id);  // Ajuste para usar `id` como `codigo`
-                funcionario.setAtivo(ativo);
-
+                Funcionario funcionario = new Funcionario(
+                        rs.getInt("codigo"),
+                        rs.getString("nome"),
+                        rs.getString("cpf"),
+                        rs.getString("tipo"),
+                        rs.getDouble("salario"),
+                        rs.getBoolean("ativo")
+                );
                 funcionarios.add(funcionario);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-            throw new SQLException("Erro ao listar funcionários", e);
         }
 
         return funcionarios;
@@ -108,6 +113,25 @@ public class FuncionarioDAO {
 
             stmt.executeUpdate();
         }
+    }
+
+    public int gerarCodigoUnico() {
+        String sql = "SELECT MAX(codigo) AS max_codigo FROM funcionarios";
+        int novoCodigo = 1;
+
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                novoCodigo = rs.getInt("max_codigo") + 1;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return novoCodigo;
     }
 
     public void reativarFuncionario(int codigo) throws SQLException {

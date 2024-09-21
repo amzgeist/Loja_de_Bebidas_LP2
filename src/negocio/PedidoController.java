@@ -210,23 +210,47 @@ public class PedidoController {
 
     public void adicionarPagamento(int numeroPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
         Pedido pedido = PedidoDAO.getInstance().buscarPedidoPorCodigo(numeroPedido);
+
+        // Verifica se o pedido foi encontrado
+        if (pedido == null) {
+            System.out.println("Pedido não encontrado.");
+            return;
+        }
+
         System.out.println("Valor total do pedido: R$ " + pedido.calcularTotal());
         System.out.println("Valor já recebido: R$ " + pedido.getValorRecebido());
 
         System.out.print("Digite o valor a ser adicionado ao pagamento: ");
-        double valorPagamento = Double.parseDouble(scanner.nextLine());
+        double valorPagamento;
+        try {
+            valorPagamento = Double.parseDouble(scanner.nextLine());
+        } catch (NumberFormatException e) {
+            System.out.println("Valor inválido. Certifique-se de inserir um número.");
+            return;
+        }
+
 
         if (valorPagamento <= 0) {
             System.out.println("O valor do pagamento deve ser maior que 0.");
         } else if (valorPagamento + pedido.getValorRecebido() > pedido.calcularTotal()) {
             System.out.println("O valor excede o total do pedido.");
         } else {
+
             pedido.setValorRecebido(pedido.getValorRecebido() + valorPagamento);
+
+
             if (pedido.getValorRecebido() >= pedido.calcularTotal()) {
                 pedido.setStatusPagamento("Pago");
             }
-            PedidoDAO.getInstance().atualizarPedido(pedido);
-            System.out.println("Pagamento adicionado com sucesso.");
+
+            int linhasAtualizadas = PedidoDAO.getInstance().atualizarPedido(pedido);
+
+
+            if (linhasAtualizadas > 0) {
+                System.out.println("Pagamento adicionado com sucesso.");
+            } else {
+                System.out.println("Erro ao adicionar pagamento. Nenhuma linha foi atualizada.");
+            }
         }
     }
 
@@ -246,7 +270,7 @@ public class PedidoController {
                 atualizarStatusPedido(pedido.getCodigo(), scanner);
                 break;
             case 2:
-                cancelarPedido(pedido.getCodigo(), scanner);
+                cancelarPedido(pedido.getCodigo());
                 break;
             case 3:
                 adicionarPagamento(pedido.getCodigo(), scanner);
@@ -260,7 +284,7 @@ public class PedidoController {
         }
     }
 
-    public void cancelarPedido(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
+    public void cancelarPedido(int codigoPedido) throws SQLException, PedidoNaoEncontradoException {
         Pedido pedido = PedidoDAO.getInstance().buscarPedidoPorCodigo(codigoPedido);
         if (pedido.getStatus().equals("Pedido Faturado. Aguardando montagem") || pedido.getStatus().equals("Aguardando entrega") || pedido.getStatus().equals("Pedido a caminho")) {
             System.out.println("Não é possível cancelar um pedido já faturado.");

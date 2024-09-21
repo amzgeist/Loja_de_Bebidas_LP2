@@ -82,5 +82,5 @@ public class ClienteDAO {
         }
     }
 
-    // Outros métodos como atualizar, deletar, etc., seguem a mesma estrutura.
+
 }
