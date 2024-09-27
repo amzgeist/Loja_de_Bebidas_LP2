@@ -26,76 +26,85 @@ public class ProdutoDAO {
         return instance;
     }
 
-    public Produto buscarProduto(int codigo) throws ProdutoNaoEncontradoException {
+    public Produto buscarProdutoPorCodigo(int codigo) throws SQLException {
+        Produto produto = null;
         String sql = "SELECT * FROM produtos WHERE codigo = ?";
 
-        try (Connection conn = ConexaoDB.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, codigo);
-
             try (ResultSet rs = stmt.executeQuery()) {
                 if (rs.next()) {
-                    String nome = rs.getString("nome");
-                    Float preco = rs.getFloat("preco");
-                    int estoque = rs.getInt("estoque");
-
-                    return new Produto(codigo, nome, preco, estoque);
-                } else {
-                    throw new ProdutoNaoEncontradoException("Produto com código " + codigo + " não encontrado.");
+                    produto = new Produto(
+                            rs.getString("nome"),
+                            rs.getFloat("preco"),
+                            rs.getInt("estoque")
+                    );
                 }
             }
-        } catch (SQLException e) {
-            throw new RuntimeException("Erro ao buscar o produto: " + e.getMessage(), e);
         }
+        return produto;
     }
 
-    public void inserirProduto(Produto produto) throws SQLException {
-        String sql = "INSERT INTO produtos (nome, preco, estoque) VALUES (?, ?, ?)";
-        try (Connection conn = ConexaoDB.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, produto.getNome());
-            stmt.setFloat(2, produto.getPreco());
-            stmt.setInt(3, produto.getEstoque());
+    public boolean produtoExiste(String nome) throws SQLException {
+        String query = "SELECT COUNT(*) FROM produtos WHERE nome = ?";
+        try (Connection connection = ConexaoDB.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, nome);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;  // Se houver um produto com o nome, retorna true
+                }
+            }
+        }
+        return false;  // Se nenhum produto foi encontrado com o nome, retorna false
+    }
+
+    public void inserirProduto(String nome, float preco, int estoque) throws SQLException {
+        String query = "INSERT INTO produtos (nome, preco, estoque) VALUES (?, ?, ?)";
+        try (Connection connection = ConexaoDB.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query)) {
+            stmt.setString(1, nome);
+            stmt.setFloat(2, preco);
+            stmt.setInt(3, estoque);
             stmt.executeUpdate();
         }
     }
 
     public void atualizarProduto(Produto produto) throws SQLException {
-        Connection connection = ConexaoDB.getConnection();
         String sql = "UPDATE produtos SET nome = ?, preco = ?, estoque = ? WHERE codigo = ?";
-        PreparedStatement statement = connection.prepareStatement(sql);
-        statement.setString(1, produto.getNome());
-        statement.setFloat(2, produto.getPreco());
-        statement.setInt(3, produto.getEstoque());
-        statement.setInt(4, produto.getCodigo());
-        statement.executeUpdate();
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setString(1, produto.getNome());
+            stmt.setFloat(2, produto.getPreco());
+            stmt.setInt(3, produto.getEstoque());
+            stmt.setInt(4, produto.getCodigo());
+
+            stmt.executeUpdate();
+        }
     }
 
     public void deletarProduto(int codigo) throws SQLException {
-        String query = "DELETE FROM produtos WHERE codigo = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        String sql = "DELETE FROM produtos WHERE codigo = ?";
+
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setInt(1, codigo);
             stmt.executeUpdate();
         }
     }
 
-    public List<Produto> listarProdutos() throws SQLException {
-        List<Produto> produtos = new ArrayList<>();
-        String sql = "SELECT * FROM produtos";
-        try (Connection conn = ConexaoDB.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
+    public void listarProdutos() throws SQLException {
+        String query = "SELECT * FROM produtos";
+        try (Connection connection = ConexaoDB.getConnection();
+             PreparedStatement stmt = connection.prepareStatement(query);
              ResultSet rs = stmt.executeQuery()) {
             while (rs.next()) {
-                Produto produto = new Produto(
-                        rs.getInt("codigo"),
-                        rs.getString("nome"),
-                        rs.getFloat("preco"),
-                        rs.getInt("estoque")
-                );
-                produtos.add(produto);
+                System.out.println("Código: " + rs.getInt("codigo"));
+                System.out.println("Nome: " + rs.getString("nome"));
+                System.out.println("Preço: " + rs.getFloat("preco"));
+                System.out.println("Estoque: " + rs.getInt("estoque"));
+                System.out.println("----------------------------------");
             }
         }
-        return produtos;
     }
-}
+    }
+

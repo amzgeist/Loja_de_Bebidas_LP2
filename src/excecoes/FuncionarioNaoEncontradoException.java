@@ -1,7 +1,8 @@
 package excecoes;
 
-public class FuncionarioNaoEncontradoException extends RuntimeException {
+public class FuncionarioNaoEncontradoException extends Exception {
     public FuncionarioNaoEncontradoException(int codigo) {
-        super("Funcionário com código " + codigo + " não encontrado.");
+        super("Funcionário com o código " + codigo + " não encontrado.");
     }
 }
+

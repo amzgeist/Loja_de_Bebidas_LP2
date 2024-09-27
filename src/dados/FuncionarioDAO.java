@@ -11,7 +11,7 @@ public class FuncionarioDAO {
     private static FuncionarioDAO instance;
 
     private FuncionarioDAO() {
-        // Construtor privado para o padrão Singleton
+
     }
 
     public static FuncionarioDAO getInstance() {
@@ -36,7 +36,7 @@ public class FuncionarioDAO {
     }
 
     public String buscarUltimoCodigo() throws SQLException {
-        String sql = "SELECT MAX(codigo_func) AS ultimo_codigo FROM funcionarios";
+        String sql = "SELECT MAX(codigo) AS ultimo_codigo FROM funcionarios";
         String ultimoCodigo = "0"; // Código inicial, caso não haja funcionários ainda
 
         try (Connection conn = ConexaoDB.getConnection();
@@ -51,32 +51,24 @@ public class FuncionarioDAO {
         return ultimoCodigo;
     }
 
-    public Funcionario buscarFuncionarioPorCodigo(int codigo) {
-        String sql = "SELECT codigo, nome, cpf, tipo, salario, ativo FROM funcionarios WHERE codigo = ?";
-        Funcionario funcionario = null;
-
+    public Funcionario buscarFuncionarioPorCodigo(int codigo) throws SQLException {
+        String sql = "SELECT * FROM funcionarios WHERE codigo = ?";
         try (Connection conn = ConexaoDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
-
             stmt.setInt(1, codigo);
             ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) {
-                funcionario = new Funcionario(
-                        rs.getInt("codigo"),  // Código do funcionário como String
-                        rs.getString("nome"),                 // Nome do funcionário
-                        rs.getString("cpf"),                  // CPF do funcionário
-                        rs.getString("tipo"),                 // Tipo do funcionário
-                        rs.getDouble("salario"),              // Salário do funcionário
-                        rs.getBoolean("ativo")                // Status ativo do funcionário
-                );
+                String nome = rs.getString("nome");
+                String cpf = rs.getString("cpf");
+                String tipo = rs.getString("tipo");
+                double salario = rs.getDouble("salario");
+                boolean ativo = rs.getBoolean("ativo");
+
+                return new Funcionario(codigo, nome, cpf, tipo, salario, ativo);
             }
-
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return funcionario;
+        return null;
     }
 
 
@@ -105,16 +97,15 @@ public class FuncionarioDAO {
     }
 
     public void atualizarFuncionario(Funcionario funcionario) throws SQLException {
-        String sql = "UPDATE funcionarios SET nome = ?, cpf = ?, tipo = ?, salario = ?, ativo = ? WHERE codigo = ?";
-
+        String sql = "UPDATE funcionarios SET nome = ?, cpf = ?, tipo = ?, salario = ? WHERE codigo = ?";
         try (Connection conn = ConexaoDB.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
+
             stmt.setString(1, funcionario.getNome());
             stmt.setString(2, funcionario.getCpf());
             stmt.setString(3, funcionario.getTipo());
             stmt.setDouble(4, funcionario.getSalario());
-            stmt.setBoolean(5, funcionario.isAtivo());
-            stmt.setInt(6, funcionario.getCodigoFunc());
+            stmt.setInt(5, funcionario.getCodigoFunc());
 
             stmt.executeUpdate();
         }

@@ -4,229 +4,338 @@ import dados.Funcionario;
 import excecoes.*;
 import negocio.Fachada;
 
+import javax.swing.*;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 public class Main {
 
-    public static void main(String[] args) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException, SQLException {
-        Scanner scanner = new Scanner(System.in);
-        Fachada fachada = new Fachada();
-        int opcao;
+    private static Fachada fachada;
+
+    public static void main(String[] args) {
+        try {
+            fachada = new Fachada();
+            showMainMenu();
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(null, "Erro ao conectar ao banco de dados: " + e.getMessage());
+        }
+    }
+
+    private static void showMainMenu() {
+        String[] options = {"Gerenciar Clientes", "Gerenciar Funcionários", "Gerenciar Produtos", "Gerenciar Pedidos", "Sair"};
+        int choice;
 
         do {
-            System.out.println("----- Menu -----");
-            System.out.println("1. Gerenciar Clientes");
-            System.out.println("2. Gerenciar Funcionarios");
-            System.out.println("3. Gerenciar Produtos");
-            System.out.println("4. Gerenciar Pedidos");
-            System.out.println("0. Sair");
-            System.out.print("Escolha uma opção: ");
-            opcao = Integer.parseInt(scanner.nextLine());
+            choice = JOptionPane.showOptionDialog(null, "Escolha uma opção:", "Sistema de Gerenciamento",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-            switch (opcao) {
+            switch (choice) {
+                case 0:
+                    manageClientes();
+                    break;
                 case 1:
-                    gerenciarClientes(fachada, scanner);
+                    manageFuncionarios();
                     break;
                 case 2:
-                    gerenciarFuncionarios(fachada, scanner);
+                    manageProdutos();
                     break;
                 case 3:
-                    gerenciarProdutos(fachada, scanner);
+                    managePedidos();
                     break;
                 case 4:
-                    gerenciarPedidos(fachada, scanner);
-                    break;
-                case 0:
-                    System.out.println("Saindo...");
+                    JOptionPane.showMessageDialog(null, "Saindo...");
+                    System.exit(0);
                     break;
                 default:
-                    System.out.println("Opção inválida.");
+                    break;
             }
-        } while (opcao != 0);
+        } while (choice != -1);
     }
 
-    private static void gerenciarClientes(Fachada fachada, Scanner scanner) throws SQLException {
-        int opcaoClientes;
-        do {
-            System.out.println("----- Gerenciar Clientes -----");
-            System.out.println("1. Cadastrar Cliente");
-            System.out.println("2. Listar Clientes");
-            System.out.println("3. Buscar Cliente");
-            System.out.println("0. Voltar ao menu principal");
-            System.out.print("Escolha uma opção: ");
-            opcaoClientes = Integer.parseInt(scanner.nextLine());
+    private static void manageClientes() {
+        String[] options = {"Cadastrar Cliente", "Listar Clientes", "Buscar Cliente", "Atualizar Cliente", "Deletar Cliente", "Voltar"};
+        int choice;
 
-            switch (opcaoClientes) {
-                case 1:
-                    fachada.cadastrarCliente(scanner);
-                    break;
-                case 2:
-                    fachada.listarClientes();
-                    break;
-                case 3:
-                    System.out.print("Digite o CPF do cliente: ");
-                    String cpf = scanner.nextLine();
-                    try {
-                        fachada.buscarCliente(cpf);
-                    } catch (ClienteNaoEncontradoException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                case 0:
-                    System.out.println("Voltando ao menu principal...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
+        do {
+            choice = JOptionPane.showOptionDialog(null, "Gerenciamento de Clientes", "Clientes",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+            try {
+                switch (choice) {
+                    case 0:
+                        cadastrarCliente();
+                        break;
+                    case 1:
+                        listarClientes();
+                        break;
+                    case 2:
+                        buscarCliente();
+                        break;
+                    case 3:
+                        atualizarCliente();
+                        break;
+                    case 4:
+                        deletarCliente();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
             }
-        } while (opcaoClientes != 0);
+        } while (choice != 5);
     }
 
-    private static void gerenciarFuncionarios(Fachada fachada, Scanner scanner) throws SQLException, FuncionarioInativoException {
-        int opcaoFuncionarios;
-        do {
-            System.out.println("----- Gerenciar Funcionários -----");
-            System.out.println("1. Cadastrar Funcionário");
-            System.out.println("2. Listar Funcionários");
-            System.out.println("3. Buscar Funcionário");
-            System.out.println("4. Atualizar Funcionário");
-            System.out.println("5. Calcular Salário Funcionário");
-            System.out.println("0. Voltar ao menu principal");
-            System.out.print("Escolha uma opção: ");
-            opcaoFuncionarios = Integer.parseInt(scanner.nextLine());
-    
-            switch (opcaoFuncionarios) {
-                case 1:
-                    fachada.cadastrarFuncionario(scanner);
-                    break;
-                case 2:
-                    fachada.listarFuncionarios();
-                    break;
-                case 3:
-                    System.out.print("Digite o código do funcionário que deseja buscar: ");
-                    int codigo = Integer.parseInt(scanner.nextLine());
-                    try {
-                        Funcionario funcionario = fachada.buscarFuncionario(codigo);
-                        System.out.println("Funcionário encontrado:");
-                        System.out.println("Nome: " + funcionario.getNome());
-                        System.out.println("CPF: " + funcionario.getCpf());
-                        System.out.println("Tipo: " + funcionario.getTipo());
-                        System.out.println("Salário: R$ " + funcionario.getSalario());
-                        System.out.println("Ativo: " + (funcionario.isAtivo() ? "Sim" : "Não"));
-                    } catch (FuncionarioNaoEncontradoException e) {
-                        System.out.println(e.getMessage());
-                    } catch (FuncionarioInativoException e) {
-                        Funcionario funcionario = e.getFuncionario();
-                        System.out.println(e.getMessage());
-                        System.out.print("Deseja reativar o funcionário " + funcionario.getNome() + "? (Sim/Não): ");
-                        String resposta = scanner.nextLine();
-                        if (resposta.equalsIgnoreCase("Sim")) {
-                            fachada.reativarFuncionario(funcionario.getCodigoFunc());
-                        }
-                    }
-                    break;
-                case 4:
-                    fachada.atualizarFuncionario(scanner);
-                    break;
-                case 5:
-                    System.out.print("Digite o código do funcionário para calcular o salário: ");
-                    int codigoCalculo = Integer.parseInt(scanner.nextLine());
-                    /*fachada.calcularSalarioFuncionario(codigoCalculo, scanner);*/
-                    break;
-                case 0:
-                    System.out.println("Voltando ao menu principal...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
-            }
-        } while (opcaoFuncionarios != 0);
-    }
-    
+    private static void manageFuncionarios() {
+        String[] options = {"Cadastrar Funcionário", "Listar Funcionários", "Buscar Funcionário", "Atualizar Funcionário", "Desativar Funcionário", "Voltar"};
+        int choice;
 
-    private static void gerenciarProdutos(Fachada fachada, Scanner scanner) throws SQLException {
-        int opcaoProdutos;
         do {
-            System.out.println("----- Gerenciar Produtos -----");
-            System.out.println("1. Cadastrar Produto");
-            System.out.println("2. Listar Produtos");
-            System.out.println("3. Buscar Produto");
-            System.out.println("4. Atualizar Produto");
-            System.out.println("0. Voltar ao menu principal");
-            System.out.print("Escolha uma opção: ");
-            opcaoProdutos = Integer.parseInt(scanner.nextLine());
+            choice = JOptionPane.showOptionDialog(null, "Gerenciamento de Funcionários", "Funcionários",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-            switch (opcaoProdutos) {
-                case 1:
-                    try {
-                        fachada.cadastrarProduto(scanner);
-                    } catch (ProdutoJaExisteException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                case 2:
-                    fachada.listarProdutos();
-                    break;
-                case 3:
-                    System.out.print("Digite o código do produto: ");
-                    int codigoProduto = Integer.parseInt(scanner.nextLine());
-                    try {
-                        fachada.buscarProduto(codigoProduto);
-                    } catch (ProdutoNaoEncontradoException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                case 4:
-                    try {
-                        fachada.atualizarProduto(scanner);
-                    } catch (SQLException e) {
-                        System.out.println("Erro ao atualizar o produto: " + e.getMessage());
-                    }
-                    break;
-                case 0:
-                    System.out.println("Voltando ao menu principal...");
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
+            try {
+                switch (choice) {
+                    case 0:
+                        cadastrarFuncionario();
+                        break;
+                    case 1:
+                        listarFuncionarios();
+                        break;
+                    case 2:
+                        buscarFuncionario();
+                        break;
+                    case 3:
+                        atualizarFuncionario();
+                        break;
+                    case 4:
+                        desativarFuncionario();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
             }
-        } while (opcaoProdutos != 0);
+        } while (choice != 5);
     }
 
-    private static void gerenciarPedidos(Fachada fachada, Scanner scanner) throws ProdutoNaoEncontradoException, PedidoNaoEncontradoException, FuncionarioInativoException, SQLException {
-        int opcaoPedidos;
+    private static void manageProdutos() {
+        String[] options = {"Cadastrar Produto", "Listar Produtos", "Buscar Produto", "Atualizar Produto", "Deletar Produto", "Voltar"};
+        int choice;
+
         do {
-            System.out.println("----- Gerenciar Pedidos -----");
-            System.out.println("1. Criar Pedido");
-            System.out.println("2. Listar Pedidos");
-            System.out.println("3. Buscar Pedido");
-            System.out.println("0. Voltar ao menu principal");
-            System.out.print("Escolha uma opção: ");
-            opcaoPedidos = Integer.parseInt(scanner.nextLine());
+            choice = JOptionPane.showOptionDialog(null, "Gerenciamento de Produtos", "Produtos",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
 
-            switch (opcaoPedidos) {
-                case 1:
-                    try {
-                        fachada.criarPedido(scanner);
-                    } catch (Exception e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                case 2:
-                    fachada.listarPedidos();
-                    break;
-
-                case 3:
-                    try {
-                        System.out.print("Digite o número do pedido que deseja buscar: ");
-                        int numeroPedido = Integer.parseInt(scanner.nextLine());
-                        fachada.exibirDetalhesPedido(numeroPedido, scanner);
-                    } catch (PedidoNaoEncontradoException e) {
-                        System.out.println(e.getMessage());
-                    }
-                    break;
-                default:
-                    System.out.println("Opção inválida.");
-                    break;
+            try {
+                switch (choice) {
+                    case 0:
+                        cadastrarProduto();
+                        break;
+                    case 1:
+                        listarProdutos();
+                        break;
+                    case 2:
+                        buscarProduto();
+                        break;
+                    case 3:
+                        atualizarProduto();
+                        break;
+                    case 4:
+                        deletarProduto();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
             }
-        } while (opcaoPedidos != 0);
+        } while (choice != 5);
+    }
+
+    private static void managePedidos() {
+        String[] options = {"Criar Pedido", "Listar Pedidos", "Buscar Pedido", "Adicionar Pagamento", "Atualizar Status", "Voltar"};
+        int choice;
+
+        do {
+            choice = JOptionPane.showOptionDialog(null, "Gerenciamento de Pedidos", "Pedidos",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.INFORMATION_MESSAGE, null, options, options[0]);
+
+            try {
+                switch (choice) {
+                    case 0:
+                        criarPedido();
+                        break;
+                    case 1:
+                        listarPedidos();
+                        break;
+                    case 2:
+                        buscarPedido();
+                        break;
+                    case 3:
+                        adicionarPagamento();
+                        break;
+                    case 4:
+                        atualizarStatusPedido();
+                        break;
+                    case 5:
+                        return;
+                    default:
+                        break;
+                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Erro: " + e.getMessage());
+            }
+        } while (choice != 5);
+    }
+
+    // Métodos relacionados a clientes
+    private static void cadastrarCliente() throws SQLException, ParseException {
+        String nome = JOptionPane.showInputDialog("Nome:");
+        String cpf = JOptionPane.showInputDialog("CPF:");
+        String dataNascimento = JOptionPane.showInputDialog("Data de Nascimento (dd/mm/yyyy):");
+        fachada.cadastrarCliente(nome, cpf, dataNascimento);
+    }
+
+    private static void listarClientes() throws SQLException {
+        fachada.listarClientes();
+    }
+
+    private static void buscarCliente() throws SQLException {
+        String cpf = JOptionPane.showInputDialog("Digite o CPF do cliente:");
+        String cliente = fachada.buscarCliente(cpf);
+        JOptionPane.showMessageDialog(null, cliente != null ? cliente : "Cliente não encontrado.");
+    }
+
+    private static void atualizarCliente() throws SQLException {
+        String cpf = JOptionPane.showInputDialog("Digite o CPF do cliente a ser atualizado:");
+        String nome = JOptionPane.showInputDialog("Novo nome:");
+        String dataNascimento = JOptionPane.showInputDialog("Nova data de nascimento:");
+        fachada.atualizarCliente(cpf, nome, dataNascimento);
+    }
+
+    private static void deletarCliente() throws SQLException {
+        String cpf = JOptionPane.showInputDialog("Digite o CPF do cliente a ser deletado:");
+        fachada.deletarCliente(cpf);
+    }
+
+    // Métodos relacionados a funcionários
+    private static void cadastrarFuncionario() throws SQLException {
+        String nome = JOptionPane.showInputDialog("Nome:");
+        String cpf = JOptionPane.showInputDialog("CPF:");
+        String tipo = JOptionPane.showInputDialog("Tipo (assalariado/comissionado):");
+        double salario = Double.parseDouble(JOptionPane.showInputDialog("Salário:"));
+        fachada.cadastrarFuncionario(nome, cpf, tipo, salario);
+    }
+
+    private static void listarFuncionarios() throws SQLException {
+        fachada.listarFuncionarios();
+    }
+
+    private static void buscarFuncionario() throws SQLException, FuncionarioNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do funcionário:"));
+        String funcionario = String.valueOf(fachada.buscarFuncionario(codigo));
+        JOptionPane.showMessageDialog(null, funcionario != null ? funcionario : "Funcionário não encontrado.");
+    }
+
+    private static void atualizarFuncionario() throws SQLException, FuncionarioNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do funcionário a ser atualizado:"));
+        String nome = JOptionPane.showInputDialog("Novo nome:");
+        String cpf = JOptionPane.showInputDialog("Novo CPF:");
+        String tipo = JOptionPane.showInputDialog("Novo tipo (assalariado/comissionado):");
+        double salario = Double.parseDouble(JOptionPane.showInputDialog("Novo salário:"));
+        fachada.atualizarFuncionario(codigo, nome, cpf, tipo, salario);
+    }
+
+    private static void desativarFuncionario() throws SQLException, FuncionarioNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do funcionário a ser desativado:"));
+        fachada.desativarFuncionario(codigo);
+    }
+
+    // Métodos relacionados a produtos
+    private static void cadastrarProduto() throws SQLException, ProdutoJaExisteException {
+        String nome = JOptionPane.showInputDialog("Nome do Produto:");
+        float preco = Float.parseFloat(JOptionPane.showInputDialog("Preço:"));
+        int estoque = Integer.parseInt(JOptionPane.showInputDialog("Estoque:"));
+        fachada.cadastrarProduto(nome, preco, estoque);
+    }
+
+    private static void listarProdutos() throws SQLException {
+        fachada.listarProdutos();
+    }
+
+    private static void buscarProduto() throws SQLException, ProdutoNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do produto:"));
+        String produto = fachada.buscarProduto(codigo);
+        JOptionPane.showMessageDialog(null, produto != null ? produto : "Produto não encontrado.");
+    }
+
+    private static void atualizarProduto() throws SQLException, ProdutoNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do produto a ser atualizado:"));
+        String nome = JOptionPane.showInputDialog("Novo nome:");
+        float preco = Float.parseFloat(JOptionPane.showInputDialog("Novo preço:"));
+        int estoque = Integer.parseInt(JOptionPane.showInputDialog("Novo estoque:"));
+        fachada.atualizarProduto(codigo, nome, preco, estoque);
+    }
+
+    private static void deletarProduto() throws SQLException, ProdutoNaoEncontradoException {
+        int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do produto a ser deletado:"));
+        fachada.deletarProduto(codigo);
+    }
+
+    // Métodos relacionados a pedidos
+    private static void criarPedido() throws SQLException, ProdutoNaoEncontradoException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException {
+        String cpfCliente = JOptionPane.showInputDialog("CPF do Cliente:");
+        int codFuncionario = Integer.parseInt(JOptionPane.showInputDialog("Código do Funcionário:"));
+        String endereco = JOptionPane.showInputDialog("Endereço:");
+        String formaPagamento = JOptionPane.showInputDialog("Forma de Pagamento:");
+        int numeroDeProdutos = Integer.parseInt(JOptionPane.showInputDialog("Quantos produtos você deseja adicionar ao pedido?"));
+
+        Map<Integer, Integer> produtos = new HashMap<>();
+
+        for (int i = 0; i < numeroDeProdutos; i++) {
+            int codigoProduto = Integer.parseInt(JOptionPane.showInputDialog("Código do Produto " + (i + 1) + ":"));
+            int quantidade = Integer.parseInt(JOptionPane.showInputDialog("Quantidade do Produto " + (i + 1) + ":"));
+            produtos.put(codigoProduto, quantidade);
+        }
+
+        fachada.criarPedido(cpfCliente, codFuncionario, endereco, produtos, formaPagamento);
+        JOptionPane.showMessageDialog(null, "Pedido criado com sucesso!");
+    }
+
+    private static void listarPedidos() throws SQLException {
+        fachada.listarPedidos();
+    }
+
+    private static void buscarPedido() throws SQLException, PedidoNaoEncontradoException {
+        int codigoPedido = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do pedido:"));
+        String pedido = fachada.buscarPedido(codigoPedido);
+        JOptionPane.showMessageDialog(null, pedido != null ? pedido : "Pedido não encontrado.");
+    }
+
+    private static void adicionarPagamento() throws SQLException, PedidoNaoEncontradoException {
+        int codigoPedido = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do pedido:"));
+        double valorPagamento = Double.parseDouble(JOptionPane.showInputDialog("Digite o valor do pagamento:"));
+
+        fachada.adicionarPagamento(codigoPedido, valorPagamento);
+        JOptionPane.showMessageDialog(null, "Pagamento adicionado com sucesso!");
+    }
+
+    private static void atualizarStatusPedido() throws SQLException, PedidoNaoEncontradoException {
+        int codigoPedido = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do pedido:"));
+        String novoStatus = JOptionPane.showInputDialog("Digite o novo status do pedido:");
+
+        fachada.atualizarStatusPedido(codigoPedido, novoStatus);
+        JOptionPane.showMessageDialog(null, "Status do pedido atualizado com sucesso!");
     }
 }

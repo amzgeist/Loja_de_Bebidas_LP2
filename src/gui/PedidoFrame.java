@@ -1,7 +1,7 @@
 package gui;
 
+import excecoes.PedidoNaoEncontradoException;
 import negocio.Fachada;
-
 import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -17,8 +17,12 @@ public class PedidoFrame extends JFrame {
     private JTextField txtFormaPagamento;
     private JTextField txtCodigoProduto;
     private JTextField txtQuantidadeProduto;
+    private JTextField txtCodigoPedido;
     private JButton btnCriarPedido;
     private JButton btnListarPedidos;
+    private JButton btnBuscarPedido;
+    private JButton btnAdicionarPagamento;
+    private JButton btnAtualizarStatus;
 
     private Map<Integer, Integer> produtos = new HashMap<>();
     private Fachada fachada;
@@ -27,7 +31,7 @@ public class PedidoFrame extends JFrame {
         fachada = new Fachada();
 
         setTitle("Gerenciamento de Pedidos");
-        setSize(400, 400);
+        setSize(400, 450);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
@@ -86,9 +90,18 @@ public class PedidoFrame extends JFrame {
         txtQuantidadeProduto.setBounds(180, 250, 170, 25);
         add(txtQuantidadeProduto);
 
+        // Código do Pedido (Para Buscar)
+        JLabel lblCodigoPedido = new JLabel("Código do Pedido:");
+        lblCodigoPedido.setBounds(30, 290, 150, 25);
+        add(lblCodigoPedido);
+
+        txtCodigoPedido = new JTextField();
+        txtCodigoPedido.setBounds(180, 290, 170, 25);
+        add(txtCodigoPedido);
+
         // Botão Criar Pedido
         btnCriarPedido = new JButton("Criar Pedido");
-        btnCriarPedido.setBounds(50, 300, 150, 30);
+        btnCriarPedido.setBounds(50, 330, 150, 30);
         btnCriarPedido.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -113,7 +126,7 @@ public class PedidoFrame extends JFrame {
 
         // Botão Listar Pedidos
         btnListarPedidos = new JButton("Listar Pedidos");
-        btnListarPedidos.setBounds(210, 300, 150, 30);
+        btnListarPedidos.setBounds(210, 330, 150, 30);
         btnListarPedidos.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -121,11 +134,71 @@ public class PedidoFrame extends JFrame {
                 try {
                     fachada.listarPedidos();
                 } catch (SQLException ex) {
-                    throw new RuntimeException(ex);
+                    JOptionPane.showMessageDialog(null, "Erro ao listar pedidos: " + ex.getMessage());
                 }
                 JOptionPane.showMessageDialog(null, pedidos);
             }
         });
         add(btnListarPedidos);
-    }
-}
+
+        // Botão Buscar Pedido
+        btnBuscarPedido = new JButton("Buscar Pedido");
+        btnBuscarPedido.setBounds(50, 370, 150, 30);
+        btnBuscarPedido.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int codigoPedido = Integer.parseInt(txtCodigoPedido.getText());
+                try {
+                    String pedidoInfo = fachada.buscarPedido(codigoPedido);
+                    if (pedidoInfo != null) {
+                        JOptionPane.showMessageDialog(null, pedidoInfo);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Pedido não encontrado.");
+                    }
+                } catch (SQLException | PedidoNaoEncontradoException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao buscar pedido: " + ex.getMessage());
+                }
+            }
+        });
+        add(btnBuscarPedido);
+
+        // Botão Adicionar Pagamento
+        btnAdicionarPagamento = new JButton("Adicionar Pagamento");
+        btnAdicionarPagamento.setBounds(210, 370, 150, 30);
+        btnAdicionarPagamento.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int codigoPedido = Integer.parseInt(txtCodigoPedido.getText());
+                double valorPagamento = Double.parseDouble(JOptionPane.showInputDialog("Digite o valor do pagamento:"));
+
+                try {
+                    fachada.adicionarPagamento(codigoPedido, valorPagamento);
+                    JOptionPane.showMessageDialog(null, "Pagamento adicionado com sucesso!");
+                } catch (SQLException | PedidoNaoEncontradoException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao adicionar pagamento: " + ex.getMessage());
+                }
+            }
+        });
+        add(btnAdicionarPagamento);
+
+        // Botão Atualizar Status
+        btnAtualizarStatus = new JButton("Atualizar Status");
+        btnAtualizarStatus.setBounds(50, 410, 150, 30);
+        btnAtualizarStatus.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int codigoPedido = Integer.parseInt(txtCodigoPedido.getText());
+                String novoStatus = JOptionPane.showInputDialog("Digite o novo status do pedido:");
+
+                try {
+                    fachada.atualizarStatusPedido(codigoPedido, novoStatus);
+                    JOptionPane.showMessageDialog(null, "Status do pedido atualizado com sucesso!");
+                } catch (SQLException ex) {
+                    JOptionPane.showMessageDialog(null, "Erro ao atualizar status do pedido: " + ex.getMessage());
+                } catch (PedidoNaoEncontradoException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+        });
+        add(btnAtualizarStatus);
+}}

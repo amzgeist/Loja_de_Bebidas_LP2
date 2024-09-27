@@ -19,6 +19,13 @@ public class Produto {
         this.estoque = estoque;
     }
 
+    public String toString() {
+        return "Produto: " + this.nome +
+                "\nPreço: R$ " + this.preco +
+                "\nEstoque: " + this.estoque +
+                "\nCódigo: " + this.codigo;
+    }
+
     // Getters e Setters
     public int getCodigo() {
         return codigo;

@@ -2,18 +2,26 @@ package negocio;
 
 import dados.*;
 import excecoes.*;
+import negocio.ClienteController;
+import negocio.FuncionarioController;
+import negocio.PedidoController;
+import negocio.ProdutoController;
 
 import java.sql.SQLException;
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
 public class Fachada {
+
     private ClienteController clienteController;
-    private FuncionarioController funcionarioController;
+    public FuncionarioController funcionarioController;
     private ProdutoController produtoController;
-    private static PedidoController pedidoController;
+    private PedidoController pedidoController;
 
     public Fachada() throws SQLException {
         this.clienteController = ClienteController.getInstance();
@@ -22,36 +30,46 @@ public class Fachada {
         this.pedidoController = PedidoController.getInstance();
     }
 
-    // Métodos relacionados a Clientes
-    public void cadastrarCliente(Scanner scanner) throws SQLException {
-        clienteController.cadastrarCliente(scanner);
-    }
+    // ----------- Cliente -----------
 
-    public void cadastrarCliente(String nome, String cpf, String dataNascimento) {
+    public void cadastrarCliente(String nome, String cpf, String dataNascimento) throws SQLException, ParseException {
+        // Converter String para Date
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-        try {
-            clienteController.cadastrarCliente(nome, cpf, sdf.parse(dataNascimento));
-        } catch (ParseException | SQLException e) {
-            System.out.println("Erro ao cadastrar cliente: " + e.getMessage());
+        Date dataNasc = sdf.parse(dataNascimento);  // Aqui converte a String para Date
+
+        clienteController.cadastrarCliente(nome, cpf, dataNasc);  // Agora passamos Date em vez de String
+    }
+
+    public String listarClientes() throws SQLException {
+        return clienteController.listarClientes();
+    }
+
+    public String buscarCliente(String cpf) throws SQLException {
+        Cliente cliente = clienteController.buscarClientePorCpf(cpf);
+        if (cliente == null) {
+            return null;
         }
+        return cliente.toString();
     }
 
-    public void listarClientes() throws SQLException {
-        clienteController.listarClientes();
+    public void atualizarCliente(String cpf, String nome, String dataNascimento) throws SQLException {
+        // Convertendo a string de data para Date
+        DateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+        Date dataNasc = null;
+        try {
+            dataNasc = dateFormat.parse(dataNascimento);
+        } catch (ParseException e) {
+            throw new RuntimeException("Data de nascimento inválida.");
+        }
+
+        clienteController.atualizarCliente(cpf, nome, dataNasc);
     }
 
-    public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException, SQLException {
-        return clienteController.buscarCliente(cpf);
+    public void deletarCliente(String cpf) throws SQLException {
+        clienteController.deletarCliente(cpf);
     }
 
-    public void atualizarCliente(Scanner scanner) throws SQLException {
-        clienteController.atualizarCliente(scanner);
-    }
-
-    // Métodos relacionados a Funcionários
-    public void cadastrarFuncionario(Scanner scanner) throws SQLException {
-        funcionarioController.cadastrarFuncionario(scanner);
-    }
+    // ----------- Funcionario -----------
 
     public void cadastrarFuncionario(String nome, String cpf, String tipo, double salario) throws SQLException {
         funcionarioController.cadastrarFuncionario(nome, cpf, tipo, salario);
@@ -61,54 +79,47 @@ public class Fachada {
         funcionarioController.listarFuncionarios();
     }
 
-    public Funcionario buscarFuncionario(int codigo) throws SQLException, FuncionarioNaoEncontradoException, FuncionarioInativoException {
-        return funcionarioController.buscarFuncionario(codigo);
+    public Funcionario buscarFuncionario(int codigo) throws SQLException, FuncionarioNaoEncontradoException {
+        return funcionarioController.buscarFuncionarioPorCodigo(codigo);
     }
 
-    public void atualizarFuncionario(Scanner scanner) throws SQLException, FuncionarioInativoException {
-        funcionarioController.atualizarFuncionario(scanner);
+    public void atualizarFuncionario(int codigo, String nome, String cpf, String tipo, double salario) throws SQLException, FuncionarioNaoEncontradoException {
+        funcionarioController.atualizarFuncionario(codigo, nome, cpf, tipo, salario);
     }
 
-    public void reativarFuncionario(int codigo) throws SQLException {
-        funcionarioController.reativarFuncionario(codigo);
-    }
-
-    public void desativarFuncionario(int codigo) throws SQLException {
+    public void desativarFuncionario(int codigo) throws SQLException, FuncionarioNaoEncontradoException {
         funcionarioController.desativarFuncionario(codigo);
     }
 
-    // Métodos relacionados a Produtos
-    public void cadastrarProduto(Scanner scanner) throws SQLException, ProdutoJaExisteException {
-        produtoController.cadastrarProduto(scanner);
-    }
+    // ----------- Produto -----------
 
-    public void cadastrarProduto(String nome, float preco, int estoque) {
-        try {
-            produtoController.cadastrarProduto(nome, preco, estoque);
-        } catch (SQLException | ProdutoJaExisteException e) {
-            System.out.println("Erro ao cadastrar produto: " + e.getMessage());
-        }
+    public void cadastrarProduto(String nome, float preco, int estoque) throws SQLException, ProdutoJaExisteException {
+        produtoController.cadastrarProduto(nome, preco, estoque);
     }
 
     public void listarProdutos() throws SQLException {
         produtoController.listarProdutos();
     }
 
-    public Produto buscarProduto(int codigoProduto) throws ProdutoNaoEncontradoException, SQLException {
-        return produtoController.buscarProduto(codigoProduto); // Retorno do produto
+    public String buscarProduto(int codigo) throws SQLException, ProdutoNaoEncontradoException {
+        Produto produto = produtoController.buscarProduto(codigo);
+        if (produto == null) {
+            return null;
+        }
+        return produto.toString();
     }
 
-    public void atualizarProduto(Scanner scanner) throws SQLException {
-        produtoController.atualizarProduto(scanner);
+    public void atualizarProduto(int codigo, String nome, float preco, int estoque) throws SQLException, ProdutoNaoEncontradoException {
+        produtoController.atualizarProduto(codigo, nome, preco, estoque);
     }
 
-    // Métodos relacionados a Pedidos
-    public void criarPedido(Scanner scanner) throws SQLException, ProdutoNaoEncontradoException, FuncionarioInativoException, ClienteNaoEncontradoException {
-        pedidoController.criarPedido(scanner, produtoController, clienteController, funcionarioController);
+    public void deletarProduto(int codigo) throws SQLException, ProdutoNaoEncontradoException {
+        produtoController.deletarProduto(codigo);
     }
 
-    public void criarPedido(String cpfCliente, int codFuncionario, String endereco, Map<Integer, Integer> produtos, String formaPagamento)
-            throws SQLException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException, ProdutoNaoEncontradoException {
+    // ----------- Pedido -----------
+
+    public void criarPedido(String cpfCliente, int codFuncionario, String endereco, Map<Integer, Integer> produtos, String formaPagamento) throws SQLException, ClienteNaoEncontradoException, FuncionarioNaoEncontradoException, ProdutoNaoEncontradoException {
         pedidoController.criarPedido(cpfCliente, codFuncionario, endereco, produtos, formaPagamento);
     }
 
@@ -116,20 +127,21 @@ public class Fachada {
         pedidoController.listarPedidos();
     }
 
-    public void exibirDetalhesPedido(int codigoPedido, Scanner scanner) throws PedidoNaoEncontradoException, SQLException {
-        Pedido pedido = pedidoController.buscarPedido(codigoPedido, scanner);
-        pedidoController.exibirDetalhesPedido(pedido, scanner);
+    public String buscarPedido(int codigo) throws SQLException, PedidoNaoEncontradoException {
+        Pedido pedido = pedidoController.buscarPedidoPorCodigo(codigo);
+
+        if (pedido == null) {
+            return null;
+        }
+
+        return pedido.toString();
     }
 
-    public void buscarPedido(int numeroPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
-        pedidoController.buscarPedido(numeroPedido, scanner);
+    public void adicionarPagamento(int codigoPedido, double valorPagamento) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.adicionarPagamento(codigoPedido, valorPagamento);
     }
 
-    public void atualizarStatusPedido(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
-        pedidoController.atualizarStatusPedido(codigoPedido, scanner);
-    }
-
-    public static void adicionarPagamento(int codigoPedido, Scanner scanner) throws SQLException, PedidoNaoEncontradoException {
-        pedidoController.adicionarPagamento(codigoPedido, scanner);
+    public void atualizarStatusPedido(int codigoPedido, String novoStatus) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.atualizarStatusPedido(codigoPedido, novoStatus);
     }
 }

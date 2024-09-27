@@ -29,6 +29,10 @@ public class ClienteController {
         return instance;
     }
 
+    public Cliente buscarClientePorCpf(String cpf) throws SQLException {
+        return clienteDAO.buscarClientePorCpf(cpf);
+    }
+
     public void cadastrarCliente(Scanner scanner) throws SQLException {
         System.out.print("Digite o nome do cliente: ");
         String nome = scanner.nextLine();
@@ -60,9 +64,13 @@ public class ClienteController {
         clienteDAO.cadastrarCliente(cliente);
     }
 
-    public void listarClientes() throws SQLException {
-        List<Cliente> clientes = ClienteDAO.getInstance().listarClientes();
-        exibirClientes(clientes);
+    public String listarClientes() throws SQLException {
+        List<Cliente> clientes = clienteDAO.listarClientes();
+        StringBuilder sb = new StringBuilder();
+        for (Cliente cliente : clientes) {
+            sb.append(cliente.toString()).append("\n");
+        }
+        return sb.toString();
     }
 
     public Cliente buscarCliente(String cpf) throws ClienteNaoEncontradoException, SQLException {
@@ -81,33 +89,12 @@ public class ClienteController {
         return cliente;
     }
 
-    public void atualizarCliente(Scanner scanner) throws SQLException, ClienteNaoEncontradoException {
-        System.out.print("Digite o CPF do cliente que deseja atualizar: ");
-        String cpf = scanner.nextLine();
-        Cliente cliente = ClienteDAO.getInstance().buscarClientePorCpf(cpf);
+    public void atualizarCliente(String cpf, String nome, Date dataNascimento) throws SQLException {
+        clienteDAO.atualizarCliente(cpf, nome, dataNascimento);
+    }
 
-        if (cliente == null) {
-            throw new ClienteNaoEncontradoException(cpf);
-        }
-
-        System.out.println("Cliente encontrado: " + cliente.getNome());
-        System.out.print("Digite o novo nome do cliente: ");
-        cliente.setNome(scanner.nextLine());
-        System.out.print("Digite a nova data de nascimento (dd/MM/yyyy): ");
-        String dataNascimentoStr = scanner.nextLine();
-
-        Date dataNascimento = null;
-        try {
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
-            dataNascimento = sdf.parse(dataNascimentoStr);
-        } catch (ParseException e) {
-            System.out.println("Formato de data inválido. Tente novamente.");
-            return;
-        }
-        cliente.setDataNascimento(dataNascimento);
-
-        ClienteDAO.getInstance().atualizarCliente(cliente);
-        System.out.println("Cliente atualizado com sucesso.");
+    public void deletarCliente(String cpf) throws SQLException {
+        clienteDAO.deletarCliente(cpf);
     }
 
     public void exibirClientes(List<Cliente> clientes) {

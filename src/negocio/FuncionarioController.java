@@ -84,43 +84,31 @@ public class FuncionarioController {
         return proximoCodigo; // Retorna como String
     }
 
-    public void listarFuncionarios() throws SQLException {
-        List<Funcionario> funcionarios = FuncionarioDAO.getInstance().listarFuncionarios();
-        exibirFuncionarios(funcionarios);
+    public List<Funcionario> listarFuncionarios() throws SQLException {
+        return funcionarioDAO.listarFuncionarios();
     }
 
-    public Funcionario buscarFuncionario(int codigo) throws SQLException, FuncionarioNaoEncontradoException, FuncionarioInativoException {
-        Funcionario funcionario = FuncionarioDAO.getInstance().buscarFuncionarioPorCodigo(codigo);
+    public Funcionario buscarFuncionarioPorCodigo(int codigo) throws SQLException, FuncionarioNaoEncontradoException {
+        Funcionario funcionario = funcionarioDAO.buscarFuncionarioPorCodigo(codigo);
+        if (funcionario == null) {
+            throw new FuncionarioNaoEncontradoException(codigo);
+        }
+        return funcionario;
+    }
+
+    public void atualizarFuncionario(int codigo, String nome, String cpf, String tipo, double salario) throws SQLException, FuncionarioNaoEncontradoException {
+        Funcionario funcionario = funcionarioDAO.buscarFuncionarioPorCodigo(codigo);
 
         if (funcionario == null) {
             throw new FuncionarioNaoEncontradoException(codigo);
         }
 
-        if (!funcionario.isAtivo()) {
-            throw new FuncionarioInativoException(funcionario.getNome());
-        }
+        funcionario.setNome(nome);
+        funcionario.setCpf(cpf);
+        funcionario.setTipo(tipo);
+        funcionario.setSalario(salario);
 
-        return funcionario;
-    }
-
-    public void atualizarFuncionario(Scanner scanner) throws SQLException, FuncionarioNaoEncontradoException, FuncionarioInativoException {
-        System.out.print("Digite o código do funcionário que deseja atualizar: ");
-        int codigo = Integer.parseInt(scanner.nextLine());
-        Funcionario funcionario = buscarFuncionario(codigo);
-
-        System.out.println("Funcionário encontrado: " + funcionario.getNome());
-        System.out.print("Digite o novo nome do funcionário: ");
-        funcionario.setNome(scanner.nextLine());
-        System.out.print("Digite o novo salário do funcionário: ");
-        funcionario.setSalario(Double.parseDouble(scanner.nextLine()));
-        System.out.print("Deseja alterar o tipo de funcionário? (1 - Assalariado, 2 - Comissionado): ");
-        String novoTipo = scanner.nextLine();
-        if (novoTipo.equals("1") || novoTipo.equals("2")) {
-            funcionario.setTipo(novoTipo.equals("1") ? "Assalariado" : "Comissionado");
-        }
-
-        FuncionarioDAO.getInstance().atualizarFuncionario(funcionario);
-        System.out.println("Funcionário atualizado com sucesso.");
+        funcionarioDAO.atualizarFuncionario(funcionario);
     }
 
     public void exibirFuncionarios(List<Funcionario> funcionarios) {

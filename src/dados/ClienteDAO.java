@@ -35,25 +35,20 @@ public class ClienteDAO {
         }
     }
 
-    public Cliente buscarClientePorCpf(String cpf) {
-        Cliente cliente = null;
+    public Cliente buscarClientePorCpf(String cpf) throws SQLException {
         String sql = "SELECT * FROM clientes WHERE cpf = ?";
-
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, cpf);
-            ResultSet rs = stmt.executeQuery();
-
-            if (rs.next()) {
-                String nome = rs.getString("nome");
-                Date dataNascimento = rs.getDate("data_nascimento"); // Obtenha a data como um objeto Date
-
-                cliente = new Cliente(nome, cpf, dataNascimento);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    String nome = rs.getString("nome");
+                    Date dataNascimento = rs.getDate("data_nascimento");
+                    return new Cliente(nome, cpf, dataNascimento);
+                }
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
-
-        return cliente;
+        return null;
     }
 
     public List<Cliente> listarClientes() throws SQLException {
@@ -72,12 +67,22 @@ public class ClienteDAO {
         return clientes;
     }
 
-    public void atualizarCliente(Cliente cliente) throws SQLException {
+    public void deletarCliente(String cpf) throws SQLException {
+        String sql = "DELETE FROM clientes WHERE cpf = ?";
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, cpf);
+            stmt.executeUpdate();
+        }
+    }
+
+    public void atualizarCliente(String cpf, String nome, Date dataNascimento) throws SQLException {
         String sql = "UPDATE clientes SET nome = ?, data_nascimento = ? WHERE cpf = ?";
-        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, cliente.getNome());
-            stmt.setDate(2, new java.sql.Date(cliente.getDataNascimento().getTime()));
-            stmt.setString(3, cliente.getCpf());
+        try (Connection conn = ConexaoDB.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, nome);
+            stmt.setDate(2, new java.sql.Date(dataNascimento.getTime()));
+            stmt.setString(3, cpf);
             stmt.executeUpdate();
         }
     }
