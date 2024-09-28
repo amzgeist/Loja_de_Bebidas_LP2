@@ -11,6 +11,7 @@ public class Pedido {
 
     private int codigo;
     private Cliente cliente;
+    private String cpfCliente;
     private Funcionario funcionario;
     private String endereco;
     private Map<Produto, Integer> produtos; // Mapeamento Produto -> Quantidade
@@ -96,6 +97,9 @@ public class Pedido {
     public String getEndereco() {
         return endereco;
     }
+    public void setCpfCliente(String cpfCliente) {
+        this.cpfCliente = cpfCliente;
+    }
 
     public void setEndereco(String endereco) {
         this.endereco = endereco;
@@ -160,27 +164,15 @@ public class Pedido {
     // Sobrescreve toString para exibir o resumo do pedido
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Pedido Código: ").append(codigo).append("\n");
-        sb.append("Cliente: ").append(cliente.getNome()).append(" (CPF: ").append(cliente.getCpf()).append(")\n");
-        sb.append("Funcionário: ").append(funcionario.getNome()).append(" (Código: ").append(funcionario.getCodigoFunc()).append(")\n");
-        sb.append("Endereço: ").append(endereco).append("\n");
-        sb.append("Forma de Pagamento: ").append(formaPagamento).append("\n");
-        sb.append("Status Pagamento: ").append(statusPagamento).append("\n");
-        sb.append("Status Pedido: ").append(status).append("\n");
-        sb.append("Data de Criação: ").append(dataCriacao).append("\n");
-        sb.append("Data de Vencimento: ").append(dataVencimento).append("\n");
-        sb.append("Produtos:\n");
-
-        for (Map.Entry<Produto, Integer> entry : produtos.entrySet()) {
-            Produto produto = entry.getKey();
-            int quantidade = entry.getValue();
-            sb.append(" - ").append(produto.getNome()).append(" (x").append(quantidade).append("): R$ ")
-                    .append(produto.getPreco() * quantidade).append("\n");
-        }
-
-        sb.append("Total: R$ ").append(calcularTotal()).append("\n");
-        sb.append("Valor Recebido: R$ ").append(valorRecebido).append("\n");
-        return sb.toString();
+        return "Pedido Código: " + codigo +
+                ", Cliente CPF: " + cpfCliente +
+                ", Funcionário Código: " + funcionario +
+                ", Endereço: " + endereco +
+                ", Forma de Pagamento: " + formaPagamento +
+                ", Data de Criação: " + dataCriacao +
+                ", Status: " + status +
+                ", Valor Recebido: " + valorRecebido;
     }
+
+
 }

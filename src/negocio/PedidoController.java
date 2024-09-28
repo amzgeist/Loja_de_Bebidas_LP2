@@ -84,8 +84,8 @@ public class PedidoController {
     }
 
     // Método para listar pedidos
-    public void listarPedidos() throws SQLException {
-        pedidoDAO.listarPedidos();
+    public List<Pedido> listarPedidos() throws SQLException {
+        return pedidoDAO.listarPedidos();
     }
 
     // Método para atualizar o status de um pedido
@@ -109,8 +109,11 @@ public class PedidoController {
 
     // Método para cancelar um pedido
     public void cancelarPedido(int codigoPedido) throws SQLException, PedidoNaoEncontradoException {
-        Pedido pedido = buscarPedidoPorCodigo(codigoPedido);
-        pedido.setStatus("Cancelado");
+        Pedido pedido = pedidoDAO.buscarPedidoPorCodigo(codigoPedido);
+        if (pedido == null) {
+            throw new PedidoNaoEncontradoException("Pedido com código " + codigoPedido + " não encontrado.");
+        }
+        pedido.setStatus("Cancelado"); // Ou o status que você desejar para pedidos cancelados
         pedidoDAO.atualizarPedido(pedido);
     }
 }

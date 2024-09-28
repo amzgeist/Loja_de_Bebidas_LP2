@@ -119,8 +119,8 @@ public class Fachada {
         pedidoController.criarPedido(cpfCliente, codFuncionario, endereco, produtos, formaPagamento);
     }
 
-    public void listarPedidos() throws SQLException {
-        pedidoController.listarPedidos();
+    public List<Pedido> listarPedidos() throws SQLException {
+        return pedidoController.listarPedidos();
     }
 
     public String buscarPedido(int codigo) throws SQLException, PedidoNaoEncontradoException {
@@ -131,6 +131,10 @@ public class Fachada {
         }
 
         return pedido.toString();
+    }
+
+    public void cancelarPedido(int codigoPedido) throws SQLException, PedidoNaoEncontradoException {
+        pedidoController.cancelarPedido(codigoPedido);
     }
 
     public void adicionarPagamento(int codigoPedido, double valorPagamento) throws SQLException, PedidoNaoEncontradoException {

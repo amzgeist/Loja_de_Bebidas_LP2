@@ -10,7 +10,7 @@ public class FuncionarioDAO {
 
     private static FuncionarioDAO instance;
 
-    private FuncionarioDAO() {
+    FuncionarioDAO() {
 
     }
 

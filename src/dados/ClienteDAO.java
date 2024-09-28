@@ -14,7 +14,7 @@ public class ClienteDAO {
     private static ClienteDAO instance;
     private Connection connection;
 
-    private ClienteDAO() throws SQLException {
+    ClienteDAO() throws SQLException {
         this.connection = ConexaoDB.getConnection();
     }
 

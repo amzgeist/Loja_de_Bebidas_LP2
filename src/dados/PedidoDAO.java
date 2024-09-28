@@ -29,7 +29,7 @@ public class PedidoDAO {
 
     // Método para inserir um novo pedido
     public void inserirPedido(Pedido pedido) throws SQLException {
-        String sql = "INSERT INTO pedidos (cliente_cpf, funcionario_codigo, endereco, forma_pagamento, data_criacao, data_vencimento, status_pagamento, valor_recebido) " +
+        String sql = "INSERT INTO pedidos (cliente_cpf, funcionario_codigo, endereco, forma_pagamento, data_hora, data_vencimento, status_pagamento, valor_recebido) " +
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 
         try (PreparedStatement stmt = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -106,30 +106,50 @@ public class PedidoDAO {
     }
 
     // Método para listar todos os pedidos
-    public void listarPedidos() throws SQLException {
+    public List<Pedido> listarPedidos() throws SQLException {
+        List<Pedido> pedidos = new ArrayList<>();
         String sql = "SELECT * FROM pedidos";
 
-        try (Statement stmt = connection.createStatement()) {
-            ResultSet rs = stmt.executeQuery(sql);
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            ResultSet rs = stmt.executeQuery();
+
+
+            ClienteDAO clienteDAO = new ClienteDAO();
+            FuncionarioDAO funcionarioDAO = new FuncionarioDAO();
 
             while (rs.next()) {
-                System.out.println("Pedido ID: " + rs.getInt("codigo"));
-                System.out.println("Cliente CPF: " + rs.getString("cliente_cpf"));
-                System.out.println("Funcionário ID: " + rs.getInt("funcionario_codigo"));
-                System.out.println("Status: " + rs.getString("status_pagamento"));
-                System.out.println("------------");
+                Pedido pedido = new Pedido();
+                pedido.setCodigo(rs.getInt("codigo"));
+
+                // Buscar o cliente pelo CPF
+                String cpfCliente = rs.getString("cliente_cpf");
+                Cliente cliente = clienteDAO.buscarClientePorCpf(cpfCliente);  // Método de instância
+                pedido.setCliente(cliente);
+
+                // Buscar o funcionário pelo código
+                int codFuncionario = rs.getInt("funcionario_codigo");
+                Funcionario funcionario = funcionarioDAO.buscarFuncionarioPorCodigo(codFuncionario);  // Método de instância
+                pedido.setFuncionario(funcionario);
+
+                pedido.setEndereco(rs.getString("endereco"));
+                pedido.setFormaPagamento(rs.getString("forma_pagamento"));
+                pedido.setDataCriacao(rs.getDate("data_hora"));
+                pedido.setDataVencimento(rs.getDate("data_vencimento"));
+                pedido.setStatus(rs.getString("status"));
+                pedido.setValorRecebido(rs.getDouble("valor_recebido"));
+
+                pedidos.add(pedido);
             }
         }
+        return pedidos;
     }
 
     // Método para atualizar um pedido
     public void atualizarPedido(Pedido pedido) throws SQLException {
-        String sql = "UPDATE pedidos SET status_pagamento = ?, valor_recebido = ? WHERE codigo = ?";
-
+        String sql = "UPDATE pedidos SET status = ? WHERE codigo = ?";
         try (PreparedStatement stmt = connection.prepareStatement(sql)) {
-            stmt.setString(1, pedido.getStatusPagamento());
-            stmt.setDouble(2, pedido.getValorRecebido());
-            stmt.setInt(3, pedido.getCodigo());
+            stmt.setString(1, pedido.getStatus());
+            stmt.setInt(2, pedido.getCodigo());
             stmt.executeUpdate();
         }
     }
