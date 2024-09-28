@@ -2,11 +2,11 @@ package gui;
 
 import dados.Pedido;
 import excecoes.PedidoNaoEncontradoException;
-import negocio.Fachada;
-import javax.swing.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.SQLException;
+import javax.swing.*;
+import negocio.Fachada;
 
 public class PedidoFrame extends JFrame {
 
@@ -20,9 +20,8 @@ public class PedidoFrame extends JFrame {
     public PedidoFrame() throws SQLException {
         fachada = new Fachada();
 
-
         setTitle("Gerenciamento de Pedidos");
-        setSize(400, 300);
+        setSize(600, 400); // Aumentei o tamanho para acomodar melhor os componentes
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setLayout(null);
@@ -36,7 +35,7 @@ public class PedidoFrame extends JFrame {
         txtCodigoPedido.setBounds(180, 30, 150, 25);
         add(txtCodigoPedido);
 
-        // Botão Criar Pedido
+        // Botões
         btnCriarPedido = new JButton("Criar Pedido");
         btnCriarPedido.setBounds(30, 80, 150, 30);
         btnCriarPedido.addActionListener(new ActionListener() {
@@ -47,9 +46,8 @@ public class PedidoFrame extends JFrame {
         });
         add(btnCriarPedido);
 
-        // Botão Listar Pedidos
-        JButton btnListarPedidos = new JButton("Listar Pedidos");
-        btnListarPedidos.setBounds(200, 70, 150, 30);
+        btnListarPedidos = new JButton("Listar Pedidos");
+        btnListarPedidos.setBounds(200, 80, 150, 30);
         btnListarPedidos.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -58,14 +56,8 @@ public class PedidoFrame extends JFrame {
         });
         add(btnListarPedidos);
 
-        textAreaPedidos = new JTextArea();
-        JScrollPane scrollPane = new JScrollPane(textAreaPedidos);
-        scrollPane.setBounds(30, 120, 540, 300);
-        add(scrollPane);
-
-        // Botão Buscar Pedido
         btnBuscarPedido = new JButton("Buscar Pedido");
-        btnBuscarPedido.setBounds(30, 180, 150, 30);
+        btnBuscarPedido.setBounds(370, 80, 150, 30);
         btnBuscarPedido.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -73,6 +65,12 @@ public class PedidoFrame extends JFrame {
             }
         });
         add(btnBuscarPedido);
+
+        // Área de texto para listar os pedidos
+        textAreaPedidos = new JTextArea();
+        JScrollPane scrollPane = new JScrollPane(textAreaPedidos);
+        scrollPane.setBounds(30, 130, 540, 200);
+        add(scrollPane);
     }
 
     // Método para abrir a tela de adicionar produtos ao pedido
