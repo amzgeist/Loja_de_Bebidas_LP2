@@ -33,7 +33,7 @@ public class Fachada {
     // ----------- Cliente -----------
 
     public void cadastrarCliente(String nome, String cpf, String dataNascimento) throws SQLException, ParseException {
-        // Converter String para Date
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
         Date dataNasc = sdf.parse(dataNascimento);  // Aqui converte a String para Date
 
@@ -97,16 +97,12 @@ public class Fachada {
         produtoController.cadastrarProduto(nome, preco, estoque);
     }
 
-    public void listarProdutos() throws SQLException {
-        produtoController.listarProdutos();
+    public List<Produto> listarProdutos() throws SQLException {
+        return produtoController.listarProdutos();
     }
 
-    public String buscarProduto(int codigo) throws SQLException, ProdutoNaoEncontradoException {
-        Produto produto = produtoController.buscarProduto(codigo);
-        if (produto == null) {
-            return null;
-        }
-        return produto.toString();
+    public Produto buscarProduto(int codigo) throws SQLException, ProdutoNaoEncontradoException {
+        return produtoController.buscarProduto(codigo);
     }
 
     public void atualizarProduto(int codigo, String nome, float preco, int estoque) throws SQLException, ProdutoNaoEncontradoException {

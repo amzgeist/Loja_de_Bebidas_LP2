@@ -6,6 +6,7 @@ import excecoes.ProdutoJaExisteException;
 import excecoes.ProdutoNaoEncontradoException;
 
 import java.sql.SQLException;
+import java.util.List;
 
 public class ProdutoController {
     private static ProdutoController instance;
@@ -32,18 +33,10 @@ public class ProdutoController {
 
     public void atualizarProduto(int codigo, String nome, float preco, int estoque) throws SQLException, ProdutoNaoEncontradoException {
         Produto produto = produtoDAO.buscarProdutoPorCodigo(codigo);
-
         if (produto == null) {
-            throw new ProdutoNaoEncontradoException("Produto com código " + codigo + " não encontrado.");
+            throw new ProdutoNaoEncontradoException("Produto não encontrado para o código: " + codigo);
         }
-
-        // Atualize os dados do produto
-        produto.setNome(nome);
-        produto.setPreco(preco);
-        produto.setEstoque(estoque);
-
-        // Atualiza no banco de dados
-        produtoDAO.atualizarProduto(produto);
+        produtoDAO.atualizarProduto(codigo, nome, preco, estoque);
     }
 
     public void cadastrarProduto(String nome, float preco, int estoque) throws SQLException, ProdutoJaExisteException {
@@ -53,8 +46,8 @@ public class ProdutoController {
         produtoDAO.inserirProduto(nome, preco, estoque);
     }
 
-    public void listarProdutos() throws SQLException {
-        produtoDAO.listarProdutos();
+    public List<Produto> listarProdutos() throws SQLException {
+        return produtoDAO.listarProdutos();
     }
 
     public void deletarProduto(int codigo) throws SQLException, ProdutoNaoEncontradoException {

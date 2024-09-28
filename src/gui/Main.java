@@ -276,7 +276,7 @@ public class Main {
 
     private static void buscarProduto() throws SQLException, ProdutoNaoEncontradoException {
         int codigo = Integer.parseInt(JOptionPane.showInputDialog("Digite o código do produto:"));
-        String produto = fachada.buscarProduto(codigo);
+        String produto = String.valueOf(fachada.buscarProduto(codigo));
         JOptionPane.showMessageDialog(null, produto != null ? produto : "Produto não encontrado.");
     }
 
